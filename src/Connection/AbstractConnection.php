@@ -969,15 +969,13 @@ abstract class AbstractConnection
      */
     public function limit(&$text, $count, $offset = 0)
     {
-        $count  = (int) $count;
-        $offset = (int) $offset;
-
-        if ($count && $offset) {
-            $text .= "LIMIT $count OFFSET $offset" . PHP_EOL;
-        } elseif ($count) {
-            $text .= "LIMIT $count" . PHP_EOL;
-        } elseif ($offset) {
-            $text .= "OFFSET $offset" . PHP_EOL;
+        $count = (int) $count;
+        if ($count) {
+            $text .= "LIMIT $count";
+            $offset = (int) $offset;
+            if ($offset) {
+                $text .= " OFFSET $offset";
+            }
         }
     }
 

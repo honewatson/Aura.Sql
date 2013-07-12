@@ -11,6 +11,7 @@
 namespace Aura\Sql\Connection;
 
 use Aura\Sql\Query\Factory as QueryFactory;
+use Aura\Sql\Profiler;
 
 /**
  * 
@@ -72,11 +73,9 @@ class ConnectionFactory
     ) {
         $class = $this->map[$adapter];
         $profiler = new Profiler;
-        $column_factory = new ColumnFactory;
         $query_factory  = new QueryFactory;
         return new $class(
             $profiler,
-            $column_factory,
             $query_factory,
             $dsn,
             $username,

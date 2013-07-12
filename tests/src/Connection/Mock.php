@@ -10,7 +10,6 @@ class Mock extends AbstractConnection
     
     public function __construct(
         ProfilerInterface $profiler,
-        ColumnFactory $column_factory,
         QueryFactory $query_factory,
         $dsn,
         $username = null,
@@ -19,7 +18,6 @@ class Mock extends AbstractConnection
     ) {
         parent::__construct(
             $profiler,
-            $column_factory,
             $query_factory,
             $dsn,
             $username,

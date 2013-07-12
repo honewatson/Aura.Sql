@@ -8,17 +8,17 @@
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
  */
-namespace Aura\Sql\Exception;
+namespace Aura\Sql\Connection;
 
-use Aura\Sql\Exception;
+use Aura\Sql\Exception as SqlException;
 
 /**
  * 
- * No such master exception
+ * Generic exception class for connections.
  * 
  * @package Aura.Sql
  * 
  */
-class NoSuchMaster extends Exception
+class Exception extends SqlException
 {
 }

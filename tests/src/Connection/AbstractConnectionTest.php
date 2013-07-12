@@ -1,5 +1,6 @@
 <?php
 namespace Aura\Sql\Connection;
+
 use PDO;
 use Aura\Sql\ConnectionFactory;
 use Aura\Sql\ColumnFactory;
@@ -48,59 +49,30 @@ abstract class AbstractConnectionTest extends \PHPUnit_Framework_TestCase
     
     protected $expect_quote_multi;
     
-    /**
-     * Sets up the fixture, for example, opens a network connection.
-     * This method is called before a test is executed.
-     */
     public function setUp()
     {
-        parent::setUp();
-        
         // skip if we don't have the extension
         if (! extension_loaded($this->extension)) {
             $this->markTestSkipped("Extension '{$this->extension}' not loaded.");
         }
         
-        // load test config values
+        // define the expected DSN string
         $test_class = get_class($this);
-        $this->connection_params = array_merge(
-            $this->connection_params,
-            $GLOBALS[$test_class]['connection_params']
-        );
-        
         $this->expect_dsn_string = $GLOBALS[$test_class]['expect_dsn_string'];
         
-        $connection_factory = new ConnectionFactory;
-        
-        $this->connection = $connection_factory->newInstance(
-            $this->connection_type,
-            $this->connection_params['dsn'],
-            $this->connection_params['username'],
-            $this->connection_params['password'],
-            $this->connection_params['options']
-        );
-        
         // database setup
-        $db_setup_class = $GLOBALS[$test_class]['db_setup_class'];
-        $this->db_setup = new $db_setup_class(
-            $this->connection,
-            $this->table,
-            $this->schema1,
-            $this->schema2
-        );
-        $this->db_setup->exec();
+        $db_setup_class = substr(get_class($this), 0, -4);
+        $db_setup_class = str_replace('Connection', 'DbSetup', $db_setup_class);
+        $this->db_setup = new $db_setup_class;
+        
+        // the connection
+        $this->connection = $this->db_setup->getConnection();
     }
     
     public function testGetProfiler()
     {
         $actual = $this->connection->getProfiler();
         $this->assertInstanceOf('\Aura\Sql\Profiler', $actual);
-    }
-    
-    public function testGetColumnFactory()
-    {
-        $actual = $this->connection->getColumnFactory();
-        $this->assertInstanceOf('\Aura\Sql\ColumnFactory', $actual);
     }
     
     public function testGetQueryFactory()
@@ -277,42 +249,6 @@ abstract class AbstractConnectionTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expect, $actual);
     }
     
-    public function testFetchTableList()
-    {
-        $actual = $this->connection->fetchTableList();
-        $this->assertEquals($this->expect_fetch_table_list, $actual);
-    }
-    
-    public function testFetchTableList_schema()
-    {
-        $actual = $this->connection->fetchTableList('aura_test_schema2');
-        $this->assertEquals($this->expect_fetch_table_list_schema, $actual);
-    }
-    
-    public function testFetchTableCols()
-    {
-        $actual = $this->connection->fetchTableCols($this->table);
-        $expect = $this->expect_fetch_table_cols;
-        ksort($actual);
-        ksort($expect);
-        $this->assertSame(count($expect), count($actual));
-        foreach (array_keys($expect) as $name) {
-            $this->assertEquals($expect[$name], $actual[$name]);
-        }
-    }
-    
-    public function testFetchTableCols_schema()
-    {
-        $actual = $this->connection->fetchTableCols("aura_test_schema2.{$this->table}");
-        $expect = $this->expect_fetch_table_cols;
-        ksort($actual);
-        ksort($expect);
-        $this->assertSame(count($expect), count($actual));
-        foreach ($expect as $name => $info) {
-            $this->assertEquals($expect[$name], $actual[$name]);
-        }
-    }
-    
     public function testQuote()
     {
         // quote a scalar
@@ -332,9 +268,6 @@ abstract class AbstractConnectionTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($this->expect_quote_array, $actual);
     }
     
-    /**
-     * @todo Implement testQuoteInto().
-     */
     public function testQuoteInto()
     {
         // no placeholders
@@ -355,9 +288,6 @@ abstract class AbstractConnectionTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($this->expect_quote_into_many, $actual);
     }
     
-    /**
-     * @todo Implement testQuoteMulti().
-     */
     public function testQuoteMulti()
     {
         $where = array(
@@ -369,9 +299,6 @@ abstract class AbstractConnectionTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($this->expect_quote_multi, $actual);
     }
     
-    /**
-     * @todo Implement testQuoteName().
-     */
     public function testQuoteName()
     {
         // table AS alias
@@ -403,9 +330,6 @@ abstract class AbstractConnectionTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('*.*', $actual);
     }
     
-    /**
-     * @todo Implement testQuoteNamesIn().
-     */
     public function testQuoteNamesIn()
     {
         $sql = "*, *.*, foo.bar, CONCAT('foo.bar', \"baz.dib\") AS zim";
@@ -488,5 +412,13 @@ abstract class AbstractConnectionTest extends \PHPUnit_Framework_TestCase
         $actual = $this->connection->fetchAll("SELECT * FROM {$this->table}");
         $this->connection->commit();
         $this->assertSame(11, count($actual));
+    }
+    
+    public function testLimit()
+    {
+        $actual = 'SELECT * FROM whatever ';
+        $this->connection->limit($actual, 10, 20);
+        $expect = 'SELECT * FROM whatever LIMIT 10 OFFSET 20';
+        $this->assertSame($expect, $actual);
     }
 }
