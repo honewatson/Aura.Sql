@@ -1,5 +1,5 @@
 <?php
-namespace Aura\Sql;
+namespace Aura\Sql\Mapper;
 
 class MockMapper extends AbstractMapper
 {

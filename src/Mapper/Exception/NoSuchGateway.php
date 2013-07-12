@@ -8,13 +8,13 @@
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
  */
-namespace Aura\Sql\Exception;
+namespace Aura\Sql\Mapper\Exception;
 
-use Aura\Sql\Exception;
+use Aura\Sql\Mapper\Exception;
 
 /**
  * 
- * No such slave exception
+ * No such gateway exception
  * 
  * @package Aura.Sql
  * 

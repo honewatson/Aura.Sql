@@ -8,8 +8,9 @@
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
  */
-namespace Aura\Sql;
+namespace Aura\Sql\Mapper;
 
+use Aura\Sql\Connection\ConnectionLocator;
 use Aura\Sql\Query\Select;
 use Aura\Sql\Query\Insert;
 use Aura\Sql\Query\Update;
