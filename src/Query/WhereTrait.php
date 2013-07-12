@@ -46,7 +46,7 @@ trait WhereTrait
         $cond = $this->connection->quoteNamesIn($cond);
 
         if (func_num_args() > 1) {
-            $cond = $this->connection->quoteInto($cond, func_get_arg(1));
+            $cond = $this->connection->quoteValuesIn($cond, func_get_arg(1));
         }
 
         if ($this->where) {
@@ -76,7 +76,7 @@ trait WhereTrait
         $cond = $this->connection->quoteNamesIn($cond);
 
         if (func_num_args() > 1) {
-            $cond = $this->connection->quoteInto($cond, func_get_arg(1));
+            $cond = $this->connection->quoteValuesIn($cond, func_get_arg(1));
         }
 
         if ($this->where) {

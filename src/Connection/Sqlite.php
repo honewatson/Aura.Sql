@@ -54,17 +54,4 @@ class Sqlite extends AbstractConnection
      * 
      */
     protected $quote_name_suffix = '"';
-
-    /**
-     * 
-     * Returns the last ID inserted on the connection.
-     * 
-     * @return mixed
-     * 
-     */
-    public function lastInsertId()
-    {
-        $pdo = $this->getPdo();
-        return $pdo->lastInsertId();
-    }
 }

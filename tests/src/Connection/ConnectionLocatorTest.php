@@ -21,9 +21,7 @@ class ConnectionLocatorTest extends \PHPUnit_Framework_TestCase
     {
         $this->default = function () {
             return new Mock(
-                new Profiler,
-                new QueryFactory,
-                ['host' => 'default.example.com'],
+                'mock:host=default.example.com',
                 'user_name',
                 'pass_word',
                 []
@@ -33,9 +31,7 @@ class ConnectionLocatorTest extends \PHPUnit_Framework_TestCase
         $this->read = [
             'read1' => function () {
                 return new Mock(
-                    new Profiler,
-                    new QueryFactory,
-                    ['host' => 'read1.example.com'],
+                    'mock:host=read1.example.com',
                     'user_name',
                     'pass_word',
                     []
@@ -43,9 +39,7 @@ class ConnectionLocatorTest extends \PHPUnit_Framework_TestCase
             },
             'read2' => function () {
                 return new Mock(
-                    new Profiler,
-                    new QueryFactory,
-                    ['host' => 'read2.example.com'],
+                    'mock:host=read2.example.com',
                     'user_name',
                     'pass_word',
                     []
@@ -53,9 +47,7 @@ class ConnectionLocatorTest extends \PHPUnit_Framework_TestCase
             },
             'read3' => function () {
                 return new Mock(
-                    new Profiler,
-                    new QueryFactory,
-                    ['host' => 'read3.example.com'],
+                    'mock:host=read3.example.com',
                     'user_name',
                     'pass_word',
                     []
@@ -66,9 +58,7 @@ class ConnectionLocatorTest extends \PHPUnit_Framework_TestCase
         $this->write = [
             'write1' => function () {
                 return new Mock(
-                    new Profiler,
-                    new QueryFactory,
-                    ['host' => 'write1.example.com'],
+                    'mock:host=write1.example.com',
                     'user_name',
                     'pass_word',
                     []
@@ -76,9 +66,7 @@ class ConnectionLocatorTest extends \PHPUnit_Framework_TestCase
             },
             'write2' => function () {
                 return new Mock(
-                    new Profiler,
-                    new QueryFactory,
-                    ['host' => 'write2.example.com'],
+                    'mock:host=write2.example.com',
                     'user_name',
                     'pass_word',
                     []
@@ -86,9 +74,7 @@ class ConnectionLocatorTest extends \PHPUnit_Framework_TestCase
             },
             'write3' => function () {
                 return new Mock(
-                    new Profiler,
-                    new QueryFactory,
-                    ['host' => 'write3.example.com'],
+                    'mock:host=write3.example.com',
                     'user_name',
                     'pass_word',
                     []
@@ -107,7 +93,7 @@ class ConnectionLocatorTest extends \PHPUnit_Framework_TestCase
         $locator = $this->newLocator();
         $conn = $locator->getDefault();
         $expect = 'mock:host=default.example.com';
-        $actual = $conn->getDsnString();
+        $actual = $conn->getDsn();
         $this->assertSame($expect, $actual);
     }
     
@@ -116,7 +102,7 @@ class ConnectionLocatorTest extends \PHPUnit_Framework_TestCase
         $locator = $this->newLocator();
         $conn = $locator->getRead();
         $expect = 'mock:host=default.example.com';
-        $actual = $conn->getDsnString();
+        $actual = $conn->getDsn();
         $this->assertSame($expect, $actual);
     }
     
@@ -133,7 +119,7 @@ class ConnectionLocatorTest extends \PHPUnit_Framework_TestCase
         // try 10 times to make sure we get lots of random responses
         for ($i = 1; $i <= 10; $i++) {
             $conn = $locator->getRead();
-            $actual = $conn->getDsnString();
+            $actual = $conn->getDsn();
             $this->assertTrue(in_array($actual, $expect));
         }
     }
@@ -143,7 +129,7 @@ class ConnectionLocatorTest extends \PHPUnit_Framework_TestCase
         $locator = $this->newLocator($this->read, $this->write);
         $conn = $locator->getRead('read2');
         $expect = 'mock:host=read2.example.com';
-        $actual = $conn->getDsnString();
+        $actual = $conn->getDsn();
         $this->assertSame($expect, $actual);
     }
     
@@ -159,7 +145,7 @@ class ConnectionLocatorTest extends \PHPUnit_Framework_TestCase
         $locator = $this->newLocator();
         $conn = $locator->getWrite();
         $expect = 'mock:host=default.example.com';
-        $actual = $conn->getDsnString();
+        $actual = $conn->getDsn();
         $this->assertSame($expect, $actual);
     }
     
@@ -176,7 +162,7 @@ class ConnectionLocatorTest extends \PHPUnit_Framework_TestCase
         // try 10 times to make sure we get lots of random responses
         for ($i = 1; $i <= 10; $i++) {
             $conn = $locator->getWrite();
-            $actual = $conn->getDsnString();
+            $actual = $conn->getDsn();
             $this->assertTrue(in_array($actual, $expect));
         }
     }
@@ -186,7 +172,7 @@ class ConnectionLocatorTest extends \PHPUnit_Framework_TestCase
         $locator = $this->newLocator($this->write, $this->write);
         $conn = $locator->getWrite('write2');
         $expect = 'mock:host=write2.example.com';
-        $actual = $conn->getDsnString();
+        $actual = $conn->getDsn();
         $this->assertSame($expect, $actual);
     }
     

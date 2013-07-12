@@ -438,7 +438,7 @@ class Select extends AbstractQuery
         $cond = $this->connection->quoteNamesIn($cond);
 
         if (func_num_args() > 1) {
-            $cond = $this->connection->quoteInto($cond, func_get_arg(1));
+            $cond = $this->connection->quoteValuesIn($cond, func_get_arg(1));
         }
 
         if ($this->having) {
@@ -468,7 +468,7 @@ class Select extends AbstractQuery
         $cond = $this->connection->quoteNamesIn($cond);
 
         if (func_num_args() > 1) {
-            $cond = $this->connection->quoteInto($cond, func_get_arg(1));
+            $cond = $this->connection->quoteValuesIn($cond, func_get_arg(1));
         }
 
         if ($this->having) {

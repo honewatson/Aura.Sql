@@ -26,12 +26,11 @@ abstract class AbstractDbSetup
         
         $connection_class = 'Aura\Sql\Connection' . $type;
         $this->connection = new $connection_class(
-            new Profiler,
-            new QueryFactory,
             $connection_params['dsn'],
             $connection_params['username'],
             $connection_params['password'],
-            $connection_params['options']
+            $connection_params['options'],
+            $connection_params['attributes']
         );
         
         $this->exec();
@@ -91,8 +90,10 @@ abstract class AbstractDbSetup
             'Gertrude', 'Hanna', 'Ione', 'Julia', 'Kara',
         ];
         
+        $statement = "INSERT INTO {$this->table} (name) VALUES (:name)";
         foreach ($names as $name) {
-            $this->connection->insert($this->table, ['name' => $name]);
+            $this->connection->bindValues(['name' => $name]);
+            $this->connection->exec($statement);
         }
     }
 }

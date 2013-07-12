@@ -21,31 +21,6 @@ class Pgsql extends AbstractConnection
 {
     /**
      * 
-     * The PDO DSN for the connection. This can be an array of key-value pairs
-     * or a string (minus the PDO type prefix).
-     * 
-     * @var string|array
-     * 
-     */
-    protected $dsn = [
-        'host' => null,
-        'port' => null,
-        'dbname' => null,
-        'user' => null,
-        'password' => null,
-    ];
-
-    /**
-     * 
-     * The PDO type prefix.
-     * 
-     * @var string
-     * 
-     */
-    protected $dsn_prefix = 'pgsql';
-
-    /**
-     * 
      * The prefix to use when quoting identifier names.
      * 
      * @var string
@@ -78,10 +53,8 @@ class Pgsql extends AbstractConnection
      * @return mixed
      * 
      */
-    public function lastInsertId($table, $col)
+    public function getLastInsertIdName($table = null, $col = null)
     {
-        $name = $this->quoteName("{$table}_{$col}_seq");
-        $pdo = $this->getPdo();
-        return $pdo->lastInsertId($name);
+        return $this->quoteName("{$table}_{$col}_seq");
     }
 }

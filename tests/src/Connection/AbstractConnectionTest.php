@@ -2,7 +2,6 @@
 namespace Aura\Sql\Connection;
 
 use PDO;
-use Aura\Sql\ConnectionFactory;
 use Aura\Sql\ColumnFactory;
 use Aura\Sql\Column;
 
@@ -29,15 +28,7 @@ abstract class AbstractConnectionTest extends \PHPUnit_Framework_TestCase
     
     protected $connection;
     
-    protected $schema1 = 'aura_test_schema1';
-    
-    protected $schema2 = 'aura_test_schema2';
-    
     protected $table = 'aura_test_table';
-    
-    protected $expect_fetch_table_list;
-    
-    protected $expect_fetch_table_cols;
     
     protected $expect_quote_scalar;
     
@@ -56,10 +47,6 @@ abstract class AbstractConnectionTest extends \PHPUnit_Framework_TestCase
             $this->markTestSkipped("Extension '{$this->extension}' not loaded.");
         }
         
-        // define the expected DSN string
-        $test_class = get_class($this);
-        $this->expect_dsn_string = $GLOBALS[$test_class]['expect_dsn_string'];
-        
         // database setup
         $db_setup_class = substr(get_class($this), 0, -4);
         $db_setup_class = str_replace('Connection', 'DbSetup', $db_setup_class);
@@ -67,38 +54,6 @@ abstract class AbstractConnectionTest extends \PHPUnit_Framework_TestCase
         
         // the connection
         $this->connection = $this->db_setup->getConnection();
-    }
-    
-    public function testGetProfiler()
-    {
-        $actual = $this->connection->getProfiler();
-        $this->assertInstanceOf('\Aura\Sql\Profiler', $actual);
-    }
-    
-    public function testGetQueryFactory()
-    {
-        $actual = $this->connection->getQueryFactory();
-        $this->assertInstanceOf('\Aura\Sql\Query\Factory', $actual);
-    }
-    
-    public function testGetDsnString()
-    {
-        $actual = $this->connection->getDsnString();
-        $this->assertEquals($this->expect_dsn_string, $actual);
-    }
-    
-    public function testSetPdo()
-    {
-        $pdo = new PDO('sqlite::memory:');
-        $this->connection->setPdo($pdo);
-        $actual = $this->connection->getPdo();
-        $this->assertSame($pdo, $actual);
-    }
-    
-    public function testGetPdo()
-    {
-        $actual = $this->connection->getPdo();
-        $this->assertInstanceOf('\PDO', $actual);
     }
     
     public function testQuery()
@@ -116,7 +71,8 @@ abstract class AbstractConnectionTest extends \PHPUnit_Framework_TestCase
     {
         $text = "SELECT * FROM {$this->table} WHERE id <= :val";
         $bind['val'] = '5';
-        $stmt = $this->connection->query($text, $bind);
+        $this->connection->bindValues($bind);
+        $stmt = $this->connection->query($text);
         $this->assertInstanceOf('PDOStatement', $stmt);
         $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
         $expect = 5;
@@ -131,26 +87,11 @@ abstract class AbstractConnectionTest extends \PHPUnit_Framework_TestCase
         $bind['list'] = [1, 2, 3, 4];
         $bind['id'] = 5;
         
-        $stmt = $this->connection->query($text, $bind);
+        $this->connection->bindValues($bind);
+        $stmt = $this->connection->query($text);
         $this->assertInstanceOf('PDOStatement', $stmt);
         $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
         $expect = 5;
-        $actual = count($result);
-        $this->assertEquals($expect, $actual);
-    }
-    
-    public function testQueryWithSelect()
-    {
-        $select = $this->connection->newSelect();
-        
-        $select->cols(['*'])
-               ->from($this->table);
-        
-        $stmt = $this->connection->query($select);
-        
-        $this->assertInstanceOf('PDOStatement', $stmt);
-        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        $expect = 10;
         $actual = count($result);
         $this->assertEquals($expect, $actual);
     }
@@ -168,9 +109,10 @@ abstract class AbstractConnectionTest extends \PHPUnit_Framework_TestCase
             'bar' => 'WRONG',
         ];
         
-        $stmt = $this->connection->prepare($text, $bind);
+        $this->connection->bindValues($bind);
+        $stmt = $this->connection->prepare($text);
         
-        $expect = str_replace(':list', '1, 2, 3, 4, 5', $text);
+        $expect = str_replace(':list', "'1', '2', '3', '4', '5'", $text);
         $actual = $stmt->queryString;
         $this->assertSame($expect, $actual);
     }
@@ -249,54 +191,24 @@ abstract class AbstractConnectionTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expect, $actual);
     }
     
-    public function testQuote()
-    {
-        // quote a scalar
-        $actual = $this->connection->quote('"foo" bar \'baz\'');
-        $this->assertEquals($this->expect_quote_scalar, $actual);
-        
-        // quote a number
-        $actual = $this->connection->quote(123.456);
-        $this->assertEquals(123.456, $actual);
-        
-        // quote a numeric
-        $actual = $this->connection->quote('123.456');
-        $this->assertEquals(123.456, $actual);
-        
-        // quote an array
-        $actual = $this->connection->quote(array('"foo"', 'bar', "'baz'"));
-        $this->assertEquals($this->expect_quote_array, $actual);
-    }
-    
-    public function testQuoteInto()
+    public function testQuoteValuesIn()
     {
         // no placeholders
-        $actual = $this->connection->quoteInto('foo = bar', "'zim'");
+        $actual = $this->connection->quoteValuesIn('foo = bar', "'zim'");
         $expect = 'foo = bar';
         $this->assertEquals($expect, $actual);
         
         // one placeholder, one value
-        $actual = $this->connection->quoteInto("foo = ?", "'bar'");
+        $actual = $this->connection->quoteValuesIn("foo = ?", "'bar'");
         $this->assertEquals($this->expect_quote_into,$actual);
         
         // many placeholders, many values
-        $actual = $this->connection->quoteInto("foo = ? AND zim = ?", ["'bar'", "'baz'"]);
+        $actual = $this->connection->quoteValuesIn("foo = ? AND zim = ?", ["'bar'", "'baz'"]);
         $this->assertEquals($this->expect_quote_into_many, $actual);
         
         // many placeholders, too many values
-        $actual = $this->connection->quoteInto("foo = ? AND zim = ?", ["'bar'", "'baz'", "'gir'"]);
+        $actual = $this->connection->quoteValuesIn("foo = ? AND zim = ?", ["'bar'", "'baz'", "'gir'"]);
         $this->assertEquals($this->expect_quote_into_many, $actual);
-    }
-    
-    public function testQuoteMulti()
-    {
-        $where = array(
-            'id = 1',
-            'foo = ?' => 'bar',
-            'zim IN(?)' => array('dib', 'gir', 'baz'),
-        );
-        $actual = $this->connection->quoteMulti($where, ' AND ');
-        $this->assertEquals($this->expect_quote_multi, $actual);
     }
     
     public function testQuoteName()
@@ -335,83 +247,6 @@ abstract class AbstractConnectionTest extends \PHPUnit_Framework_TestCase
         $sql = "*, *.*, foo.bar, CONCAT('foo.bar', \"baz.dib\") AS zim";
         $actual = $this->connection->quoteNamesIn($sql);
         $this->assertEquals($this->expect_quote_names_in, $actual);
-    }
-    
-    public function testInsertAndLastInsertId()
-    {
-        $cols = ['name' => 'Laura'];
-        $actual = $this->connection->insert($this->table, $cols);
-        
-        // did we get the right last ID?
-        $actual = $this->fetchLastInsertId();
-        $expect = '11';
-        $this->assertEquals($expect, $actual);
-        
-        // did it insert?
-        $actual = $this->connection->fetchOne("SELECT id, name FROM {$this->table} WHERE id = 11");
-        $expect = ['id' => '11', 'name' => 'Laura'];
-        $this->assertEquals($actual, $expect);
-    }
-    
-    protected function fetchLastInsertId()
-    {
-        return $this->connection->lastInsertId();
-    }
-    
-    public function testUpdate()
-    {
-        $cols   = ['name' => 'Annabelle'];
-        $where  = 'id = :id';
-        $bind   = ['id' => 1];
-        $actual = $this->connection->update($this->table, $cols, $where, $bind);
-        
-        // did it update?
-        $actual = $this->connection->fetchOne("SELECT id, name FROM {$this->table} WHERE id = 1");
-        $expect = ['id' => '1', 'name' => 'Annabelle'];
-        $this->assertEquals($actual, $expect);
-        
-        // did anything else update?
-        $actual = $this->connection->fetchOne("SELECT id, name FROM {$this->table} WHERE id = 2");
-        $expect = ['id' => '2', 'name' => 'Betty'];
-        $this->assertEquals($actual, $expect);
-    }
-    
-    public function testDelete()
-    {
-        $where  = 'id = :id';
-        $bind   = ['id' => 1];
-        $actual = $this->connection->delete($this->table, $where, $bind);
-        
-        // did it delete?
-        $actual = $this->connection->fetchOne("SELECT * FROM {$this->table} WHERE id = 1");
-        $this->assertFalse($actual);
-        
-        // do we still have everything else?
-        $actual = $this->connection->fetchAll("SELECT * FROM {$this->table}");
-        $expect = 9;
-        $this->assertEquals($expect, count($actual));
-    }
-    
-    public function testTransactions()
-    {
-        // data
-        $cols = ['name' => 'Laura'];
-
-        // begin and rollback
-        $this->connection->beginTransaction();
-        $this->connection->insert($this->table, $cols);
-        $actual = $this->connection->fetchAll("SELECT * FROM {$this->table}");
-        $this->assertSame(11, count($actual));
-        $this->connection->rollback();
-        $actual = $this->connection->fetchAll("SELECT * FROM {$this->table}");
-        $this->assertSame(10, count($actual));
-        
-        // begin and commit
-        $this->connection->beginTransaction();
-        $this->connection->insert($this->table, $cols);
-        $actual = $this->connection->fetchAll("SELECT * FROM {$this->table}");
-        $this->connection->commit();
-        $this->assertSame(11, count($actual));
     }
     
     public function testLimit()
