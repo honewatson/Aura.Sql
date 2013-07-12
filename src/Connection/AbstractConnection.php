@@ -39,6 +39,42 @@ abstract class AbstractConnection extends ExtendedPdo
      */
     protected $quote_name_suffix;
 
+    public function lastInsertId($table = null, $col = null)
+    {
+        $name = $this->getLastInsertIdName($table, $col);
+        return parent::lastInsertId($name);
+    }
+    
+    public function getLastInsertIdName($table = null, $col =  null)
+    {
+        return null;
+    }
+    
+    /**
+     * 
+     * Modifies an SQL string **in place** to add a `LIMIT ... OFFSET` clause.
+     * 
+     * @param string $text The SQL string.
+     * 
+     * @param int $count The number of rows to return.
+     * 
+     * @param int $offset Skip this many rows first.
+     * 
+     * @return void
+     * 
+     */
+    public function limit(&$text, $count, $offset = 0)
+    {
+        $count = (int) $count;
+        if ($count) {
+            $text .= "LIMIT $count";
+            $offset = (int) $offset;
+            if ($offset) {
+                $text .= " OFFSET $offset";
+            }
+        }
+    }
+
     /**
      * 
      * Quotes a value and places into a piece of text at a placeholder; the
@@ -226,31 +262,6 @@ abstract class AbstractConnection extends ExtendedPdo
 
         // done!
         return $text;
-    }
-
-    /**
-     * 
-     * Modifies an SQL string **in place** to add a `LIMIT ... OFFSET` clause.
-     * 
-     * @param string $text The SQL string.
-     * 
-     * @param int $count The number of rows to return.
-     * 
-     * @param int $offset Skip this many rows first.
-     * 
-     * @return void
-     * 
-     */
-    public function limit(&$text, $count, $offset = 0)
-    {
-        $count = (int) $count;
-        if ($count) {
-            $text .= "LIMIT $count";
-            $offset = (int) $offset;
-            if ($offset) {
-                $text .= " OFFSET $offset";
-            }
-        }
     }
 
     /**
