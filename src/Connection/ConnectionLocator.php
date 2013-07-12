@@ -10,11 +10,9 @@
  */
 namespace Aura\Sql\Connection;
 
-use Aura\Sql\Connection\AbstractConnection;
-
 /**
  * 
- * Manages connections to default, master, and slave databases.
+ * Manages connections to default, read, and write databases.
  * 
  * @package Aura.Sql
  * 
@@ -23,298 +21,185 @@ class ConnectionLocator
 {
     /**
      * 
-     * An SQL connection factory.
-     * 
-     * @var ConnectionFactory
-     * 
-     */
-    protected $connection_factory;
-
-    /**
-     * 
-     * SQL connection connection objects as constructed from their params.
+     * A registry of connection objects.
      * 
      * @var array
      * 
      */
-    protected $connection = [
+    protected $registry = [
         'default' => null,
-        'masters' => [],
-        'slaves'  => [],
+        'read' => [],
+        'write' => [],
     ];
 
     /**
      * 
-     * The default connection params.
+     * Whether or not registry entries have been converted to objects.
      * 
      * @var array
      * 
      */
-    protected $default = [
-        'adapter'  => null,
-        'dsn'      => [],
-        'username' => null,
-        'password' => null,
-        'options'  => [],
+    protected $converted = [
+        'default' => false,
+        'read' => [],
+        'write' => [],
     ];
-
-    /**
-     * 
-     * Params for one or more master connections. The key for each element in
-     * the array is a name for the connection, and each value is an array of
-     * connection params (cf. the `$default` array elements).
-     * 
-     * @var array
-     * 
-     */
-    protected $masters = [];
-
-    /**
-     * 
-     * Params for one or more slave connections. The key for each element in
-     * the array is a name for the connection, and each value is an array of
-     * connection params (cf. the $default array elements).
-     * 
-     * @var array
-     * 
-     */
-    protected $slaves = [];
-
+    
     /**
      * 
      * Constructor.
      * 
-     * @param ConnectionFactory $connection_factory An connection factory to create 
-     * connection objects.
+     * @param callable $default A callable to create a default connection.
      * 
-     * @param array $default An array of key-value pairs for the default
-     * connection.
+     * @param array $read An array of callables to create read connections.
      * 
-     * @param array $masters An array of key-value pairs where the key is
-     * the connection name and the value is an array of connection params.
-     * 
-     * @param array $slaves An array of key-value pairs where the key is
-     * the connection name and the value is an array of connection params.
+     * @param array $write An array of callables to create write connections.
      * 
      */
     public function __construct(
-        ConnectionFactory $connection_factory,
-        array $default = [],
-        array $masters = [],
-        array $slaves  = []
+        $default,
+        array $read = [],
+        array $write = []
     ) {
-        $this->connection_factory = $connection_factory;
         $this->setDefault($default);
-        foreach ($masters as $name => $params) {
-            $this->setMaster($name, $params);
+        foreach ($read as $name => $spec) {
+            $this->setRead($name, $spec);
         }
-        foreach ($slaves as $name => $params) {
-            $this->setSlave($name, $params);
+        foreach ($write as $name => $spec) {
+            $this->setWrite($name, $spec);
         }
     }
 
     /**
      * 
-     * Sets the default connection params.
+     * Sets the default connection registry entry.
      * 
-     * @param array $params The default connection params.
+     * @param callable $spec The registry entry.
      * 
      * @return void
      * 
      */
-    public function setDefault(array $params)
+    public function setDefault($spec)
     {
-        $this->default = array_merge($this->default, $params);
-    }
-
-    /**
-     * 
-     * Sets the params for one master connection by name.
-     * 
-     * @param string $name The master connection name.
-     * 
-     * @param array $params The master connection params.
-     * 
-     * @return void
-     * 
-     */
-    public function setMaster($name, array $params)
-    {
-        $this->masters[$name] = $params;
-    }
-
-    /**
-     * 
-     * Sets the params for one slave connection by name.
-     * 
-     * @param string $name The slave connection name.
-     * 
-     * @param array $params The slave connection params.
-     * 
-     * @return void
-     * 
-     */
-    public function setSlave($name, array $params)
-    {
-        $this->slaves[$name] = $params;
-    }
-
-    /**
-     * 
-     * Returns a "read" connection.  Picks a connection in this order:
-     * 
-     * - A random slave; or,
-     * 
-     * - If there are no slaves, a random master; or,
-     * 
-     * - If there are no masters, the default connection.
-     * 
-     * @return AbstractConnection
-     * 
-     */
-    public function getRead()
-    {
-        if ($this->slaves) {
-            return $this->getSlave();
-        } elseif ($this->masters) {
-            return $this->getMaster();
-        } else {
-            return $this->getDefault();
-        }
-    }
-
-    /**
-     * 
-     * Returns a "write" connection.  Picks a connection in this order:
-     * 
-     * - A random master; or,
-     * 
-     * - If there are no masters, the default connection.
-     * 
-     * @return AbstractConnection
-     * 
-     */
-    public function getWrite()
-    {
-        if ($this->masters) {
-            return $this->getMaster();
-        } else {
-            return $this->getDefault();
-        }
+        $this->registry['default'] = $spec;
+        $this->converted['default'] = false;
     }
 
     /**
      * 
      * Returns the default connection object.
      * 
-     * @return AbstractConnection
+     * @return ConnectionInterface
      * 
      */
     public function getDefault()
     {
-        if (! $this->connection['default'] instanceof AbstractConnection) {
-            $this->connection['default'] = $this->connection_factory->newInstance(
-                $this->default['adapter'],
-                $this->default['dsn'],
-                $this->default['username'],
-                $this->default['password'],
-                $this->default['options']
-            );
+        if (! $this->converted['default']) {
+            $func = $this->registry['default'];
+            $this->registry['default'] = $func();
+            $this->converted['default'] = true;
         }
-        return $this->connection['default'];
+        
+        return $this->registry['default'];
     }
 
     /**
      * 
-     * Returns a "master" connection object by name.
+     * Sets a read connection registry entry by name.
      * 
-     * @param string $name The master connection name; if not specified,
-     * returns a random master connection.
+     * @param string $name The name of the registry entry.
      * 
-     * @return AbstractConnection
+     * @param callable $spec The registry entry.
+     * 
+     * @return void
      * 
      */
-    public function getMaster($name = null)
+    public function setRead($name, $spec)
     {
-        if ($name === null) {
-            $name = array_rand($this->masters);
-        } elseif (! isset($this->masters[$name])) {
-            throw new Exception\NoSuchMaster($name);
-        }
-
-        $is_conn = isset($this->connection['masters'][$name])
-                && $this->connection['masters'][$name] instanceof AbstractConnection;
-
-        if (! $is_conn) {
-            $params = $this->merge($this->default, $this->masters[$name]);
-            $this->connection['masters'][$name] = $this->connection_factory->newInstance(
-                $params['adapter'],
-                $params['dsn'],
-                $params['username'],
-                $params['password'],
-                $params['options']
-            );
-        }
-
-        return $this->connection['masters'][$name];
+        $this->registry['read'][$name] = $spec;
+        $this->converted['read'][$name] = false;
     }
 
     /**
      * 
-     * Returns a "slave" connection object by name.
+     * Returns a read connection by name; if no name is given, picks a
+     * random connection; if no read connections are present, returns the
+     * default connection.
      * 
-     * @param string $name The slave connection name; if not specified,
-     * returns a random slave.
+     * @param string $name The read connection name to return.
      * 
-     * @return AbstractConnection
+     * @return ConnectionInterface
      * 
      */
-    public function getSlave($name = null)
+    public function getRead($name = null)
     {
-        if ($name === null) {
-            $name = array_rand($this->slaves);
-        } elseif (! isset($this->slaves[$name])) {
-            throw new Exception\NoSuchSlave($name);
-        }
-
-        $is_conn = isset($this->connection['slaves'][$name])
-                && $this->connection['slaves'][$name] instanceof AbstractConnection;
-
-        if (! $is_conn) {
-            $params = $this->merge($this->default, $this->slaves[$name]);
-            $this->connection['slaves'][$name] = $this->connection_factory->newInstance(
-                $params['adapter'],
-                $params['dsn'],
-                $params['username'],
-                $params['password'],
-                $params['options']
-            );
-        }
-        return $this->connection['slaves'][$name];
+        return $this->getConnection('read', $name);
     }
 
     /**
      * 
-     * A merge function somewhat more friendly than array_merge_recursive()
-     * (we need to override sequential values, not append them).
+     * Sets a write connection registry entry by name.
      * 
-     * @param array $baseline The baseline values.
+     * @param string $name The name of the registry entry.
      * 
-     * @param array $override The override values.
+     * @param callable $spec The registry entry.
      * 
-     * @return array
+     * @return void
      * 
      */
-    protected function merge($baseline, array $override = [])
+    public function setWrite($name, $spec)
     {
-        foreach ($override as $key => $val) {
-            if (array_key_exists($key, $baseline) && is_array($val)) {
-                $baseline[$key] = $this->merge($baseline[$key], $override[$key]);
-            } else {
-                $baseline[$key] = $val;
-            }
-        }
+        $this->registry['write'][$name] = $spec;
+        $this->converted['write'][$name] = false;
+    }
 
-        return $baseline;
+    /**
+     * 
+     * Returns a write connection by name; if no name is given, picks a
+     * random connection; if no write connections are present, returns the
+     * default connection.
+     * 
+     * @param string $name The write connection name to return.
+     * 
+     * @return ConnectionInterface
+     * 
+     */
+    public function getWrite($name = null)
+    {
+        return $this->getConnection('write', $name);
+    }
+    
+    /**
+     * 
+     * Returns a connection by name.
+     * 
+     * @param string $type The connection type ('read' or 'write').
+     * 
+     * @param string $name The name of the connection.
+     * 
+     * @return ConnectionInterface
+     * 
+     */
+    protected function getConnection($type, $name)
+    {
+        if (! $this->registry[$type]) {
+            return $this->getDefault();
+        }
+        
+        if (! $name) {
+            $name = array_rand($this->registry[$type]);
+        }
+        
+        if (! isset($this->registry[$type][$name])) {
+            throw new Exception\ConnectionNotFound("{$type}:{$name}");
+        }
+        
+        if (! $this->converted[$type][$name]) {
+            $func = $this->registry[$type][$name];
+            $this->registry[$type][$name] = $func();
+            $this->converted[$type][$name] = true;
+        }
+        
+        return $this->registry[$type][$name];
     }
 }

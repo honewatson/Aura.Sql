@@ -14,11 +14,11 @@ use Aura\Sql\Connection\Exception;
 
 /**
  * 
- * No such slave exception
+ * Connection not found exception.
  * 
  * @package Aura.Sql
  * 
  */
-class NoSuchSlave extends Exception
+class ConnectionNotFound extends Exception
 {
 }

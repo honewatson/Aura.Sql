@@ -1,247 +1,199 @@
 <?php
 namespace Aura\Sql\Connection;
 
+use Aura\Sql\Profiler;
+use Aura\Sql\Query\Factory as QueryFactory;
+
 class ConnectionLocatorTest extends \PHPUnit_Framework_TestCase
 {
-    protected $manager;
+    /**
+     * @var ConnectionLocator
+     */
+    protected $locator;
     
-    protected $default = [
-        'adapter'  => 'mock',
-        'dsn'      => ['host' => 'default.example.com', 'dbname' => 'test'],
-        'username' => 'default_user',
-        'password' => 'default_pass',
-        'options'  => [],
-    ];
+    protected $default;
     
-    protected $masters = [
-        // uses defaults
-        'master1' => [],
-        // overrides the dsn host
-        'master2' => [
-            'dsn' => ['host' => 'master2.example.com'],
-        ],
-    ];
+    protected $read = [];
     
-    protected $slaves = [
-        // uses defaults
-        'slave1' => [],
-        // overrides the dsn host
-        'slave2' => [
-            'dsn' => ['host' => 'slave2.example.com'],
-        ],
-        // overrides the dsn host
-        'slave3' => [
-            'dsn' => ['host' => 'slave3.example.com'],
-        ],
-    ];
+    protected $write = [];
     
     protected function setUp()
     {
-        parent::setUp();
-    }
-    
-    protected function newManager(
-        array $default = [],
-        array $masters = [],
-        array $slaves  = []
-    ) {
-        $map = [
-            'mock' => 'Aura\Sql\Connection\Mock',
-        ];
-        $factory = new ConnectionFactory($map);
-        return new ConnectionLocator($factory, $default, $masters, $slaves);
-    }
-    
-    protected function tearDown()
-    {
-        parent::tearDown();
-    }
-
-    public function testGetReadDefaultOnly()
-    {
-        $manager = $this->newManager($this->default);
-        $conn = $manager->getRead();
-        $expect = 'default.example.com';
-        $actual = $conn->getDsnHost();
-        $this->assertSame($expect, $actual);
-    }
-    
-    public function testGetReadDefaultAndMasters()
-    {
-        $manager = $this->newManager($this->default, $this->masters);
-        $expect = [
-            'default.example.com',
-            'master2.example.com',
+        $this->default = function () {
+            return new Mock(
+                new Profiler,
+                new QueryFactory,
+                ['host' => 'default.example.com'],
+                'user_name',
+                'pass_word',
+                []
+            );
+        };
+        
+        $this->read = [
+            'read1' => function () {
+                return new Mock(
+                    new Profiler,
+                    new QueryFactory,
+                    ['host' => 'read1.example.com'],
+                    'user_name',
+                    'pass_word',
+                    []
+                );
+            },
+            'read2' => function () {
+                return new Mock(
+                    new Profiler,
+                    new QueryFactory,
+                    ['host' => 'read2.example.com'],
+                    'user_name',
+                    'pass_word',
+                    []
+                );
+            },
+            'read3' => function () {
+                return new Mock(
+                    new Profiler,
+                    new QueryFactory,
+                    ['host' => 'read3.example.com'],
+                    'user_name',
+                    'pass_word',
+                    []
+                );
+            },
         ];
         
-        // try 10 times to make sure we get lots of random responses
-        for ($i = 1; $i <= 10; $i++) {
-            $conn = $manager->getRead();
-            $actual = $conn->getDsnHost();
-            $this->assertTrue(in_array($actual, $expect));
-        }
-    }
-    
-    public function testGetReadDefaultMastersAndSlaves()
-    {
-        $manager = $this->newManager($this->default, $this->masters, $this->slaves);
-        $expect = [
-            'default.example.com',
-            'slave2.example.com',
-            'slave3.example.com',
+        $this->write = [
+            'write1' => function () {
+                return new Mock(
+                    new Profiler,
+                    new QueryFactory,
+                    ['host' => 'write1.example.com'],
+                    'user_name',
+                    'pass_word',
+                    []
+                );
+            },
+            'write2' => function () {
+                return new Mock(
+                    new Profiler,
+                    new QueryFactory,
+                    ['host' => 'write2.example.com'],
+                    'user_name',
+                    'pass_word',
+                    []
+                );
+            },
+            'write3' => function () {
+                return new Mock(
+                    new Profiler,
+                    new QueryFactory,
+                    ['host' => 'write3.example.com'],
+                    'user_name',
+                    'pass_word',
+                    []
+                );
+            },
         ];
-        
-        // try 10 times to make sure we get lots of random responses
-        for ($i = 1; $i <= 10; $i++) {
-            $conn = $manager->getRead();
-            $actual = $conn->getDsnHost();
-            $this->assertTrue(in_array($actual, $expect));
-        }
     }
     
-    public function testGetReadDefaultAndSlaves()
+    protected function newLocator($read = [], $write = [])
     {
-        $manager = $this->newManager($this->default, [], $this->slaves);
-        $expect = [
-            'default.example.com',
-            'slave2.example.com',
-            'slave3.example.com',
-        ];
-        
-        // try 10 times to make sure we get lots of random responses
-        for ($i = 1; $i <= 10; $i++) {
-            $conn = $manager->getRead();
-            $actual = $conn->getDsnHost();
-            $this->assertTrue(in_array($actual, $expect));
-        }
+        return new ConnectionLocator($this->default, $read, $write);
     }
     
-    public function testGetWriteDefaultOnly()
-    {
-        $manager = $this->newManager($this->default);
-        $conn = $manager->getWrite();
-        $expect = 'default.example.com';
-        $actual = $conn->getDsnHost();
-        $this->assertSame($expect, $actual);
-    }
-    
-    public function testGetWriteDefaultAndMasters()
-    {
-        $manager = $this->newManager($this->default, $this->masters);
-        $expect = [
-            'default.example.com',
-            'master2.example.com',
-        ];
-        
-        // try 10 times to make sure we get lots of random responses
-        for ($i = 1; $i <= 10; $i++) {
-            $conn = $manager->getWrite();
-            $actual = $conn->getDsnHost();
-            $this->assertTrue(in_array($actual, $expect));
-        }
-    }
-    
-    public function testGetWriteDefaultMastersAndSlaves()
-    {
-        $manager = $this->newManager($this->default, $this->masters, $this->slaves);
-        $expect = [
-            'default.example.com',
-            'master2.example.com',
-        ];
-        
-        // try 10 times to make sure we get lots of random responses
-        for ($i = 1; $i <= 10; $i++) {
-            $conn = $manager->getWrite();
-            $actual = $conn->getDsnHost();
-            $this->assertTrue(in_array($actual, $expect));
-        }
-    }
-    
-    public function testGetWriteDefaultAndSlaves()
-    {
-        $manager = $this->newManager($this->default, [], $this->slaves);
-        $expect = [
-            'default.example.com',
-        ];
-        
-        // try 10 times to make sure we get lots of random responses
-        for ($i = 1; $i <= 10; $i++) {
-            $conn = $manager->getWrite();
-            $actual = $conn->getDsnHost();
-            $this->assertTrue(in_array($actual, $expect));
-        }
-    }
-    
-    /**
-     * @todo Implement testGetDefault().
-     */
     public function testGetDefault()
     {
-        $manager = $this->newManager($this->default);
-        $conn = $manager->getDefault();
-        $this->assertInstanceOf('Aura\Sql\Connection\Mock', $conn);
-        
-        $expect = $this->default;
-        unset($expect['adapter']);
-        $this->assertSame($conn->getParams(), $expect);
-    }
-
-    public function testGetDefaultSameObject()
-    {
-        $manager = $this->newManager($this->default);
-        $conn1 = $manager->getDefault();
-        $conn2 = $manager->getDefault();
-        $this->assertSame($conn1, $conn2);
-    }
-    
-    // get a master by key; randomness was ascertained by getRead/getWrite
-    public function testGetMaster()
-    {
-        $manager = $this->newManager($this->default, $this->masters);
-        
-        $conn = $manager->getMaster('master1');
-        $expect = 'default.example.com';
-        $actual = $conn->getDsnHost();
-        $this->assertSame($expect, $actual);
-        
-        $conn = $manager->getMaster('master2');
-        $expect = 'master2.example.com';
-        $actual = $conn->getDsnHost();
+        $locator = $this->newLocator();
+        $conn = $locator->getDefault();
+        $expect = 'mock:host=default.example.com';
+        $actual = $conn->getDsnString();
         $this->assertSame($expect, $actual);
     }
     
-    public function testNoSuchMaster()
+    public function testGetReadDefault()
     {
-        $manager = $this->newManager($this->default);
-        $this->setExpectedException('Aura\Sql\Connection\Exception\NoSuchMaster');
-        $actual = $manager->getMaster('master1');
-    }
-    
-    public function testGetSlave()
-    {
-        $manager = $this->newManager($this->default, $this->masters, $this->slaves);
-        
-        $conn = $manager->getSlave('slave1');
-        $expect = 'default.example.com';
-        $actual = $conn->getDsnHost();
-        $this->assertSame($expect, $actual);
-        
-        $conn = $manager->getSlave('slave2');
-        $expect = 'slave2.example.com';
-        $actual = $conn->getDsnHost();
-        $this->assertSame($expect, $actual);
-        
-        $conn = $manager->getSlave('slave3');
-        $expect = 'slave3.example.com';
-        $actual = $conn->getDsnHost();
+        $locator = $this->newLocator();
+        $conn = $locator->getRead();
+        $expect = 'mock:host=default.example.com';
+        $actual = $conn->getDsnString();
         $this->assertSame($expect, $actual);
     }
     
-    public function testNoSuchSlave()
+    public function testGetReadRandom()
     {
-        $manager = $this->newManager($this->default);
-        $this->setExpectedException('Aura\Sql\Connection\Exception\NoSuchSlave');
-        $actual = $manager->getSlave('slave1');
+        $locator = $this->newLocator($this->read, $this->write);
+        
+        $expect = [
+            'mock:host=read1.example.com',
+            'mock:host=read2.example.com',
+            'mock:host=read3.example.com',
+        ];
+        
+        // try 10 times to make sure we get lots of random responses
+        for ($i = 1; $i <= 10; $i++) {
+            $conn = $locator->getRead();
+            $actual = $conn->getDsnString();
+            $this->assertTrue(in_array($actual, $expect));
+        }
     }
     
+    public function testGetReadName()
+    {
+        $locator = $this->newLocator($this->read, $this->write);
+        $conn = $locator->getRead('read2');
+        $expect = 'mock:host=read2.example.com';
+        $actual = $conn->getDsnString();
+        $this->assertSame($expect, $actual);
+    }
+    
+    public function testGetReadMissing()
+    {
+        $locator = $this->newLocator($this->read, $this->write);
+        $this->setExpectedException('Aura\Sql\Connection\Exception\ConnectionNotFound');
+        $conn = $locator->getRead('no-such-connection');
+    }
+    
+    public function testGetWriteDefault()
+    {
+        $locator = $this->newLocator();
+        $conn = $locator->getWrite();
+        $expect = 'mock:host=default.example.com';
+        $actual = $conn->getDsnString();
+        $this->assertSame($expect, $actual);
+    }
+    
+    public function testGetWriteRandom()
+    {
+        $locator = $this->newLocator($this->write, $this->write);
+        
+        $expect = [
+            'mock:host=write1.example.com',
+            'mock:host=write2.example.com',
+            'mock:host=write3.example.com',
+        ];
+        
+        // try 10 times to make sure we get lots of random responses
+        for ($i = 1; $i <= 10; $i++) {
+            $conn = $locator->getWrite();
+            $actual = $conn->getDsnString();
+            $this->assertTrue(in_array($actual, $expect));
+        }
+    }
+    
+    public function testGetWriteName()
+    {
+        $locator = $this->newLocator($this->write, $this->write);
+        $conn = $locator->getWrite('write2');
+        $expect = 'mock:host=write2.example.com';
+        $actual = $conn->getDsnString();
+        $this->assertSame($expect, $actual);
+    }
+    
+    public function testGetWriteMissing()
+    {
+        $locator = $this->newLocator($this->write, $this->write);
+        $this->setExpectedException('Aura\Sql\Connection\Exception\ConnectionNotFound');
+        $conn = $locator->getWrite('no-such-connection');
+    }
 }
