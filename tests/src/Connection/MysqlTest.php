@@ -13,9 +13,7 @@ class MysqlTest extends AbstractConnectionTest
     
     protected $expect_quote_into = "foo = '\'bar\''";
     
-    protected $expect_quote_into_many = "foo = '\'bar\'' AND zim = '\'baz\''";
-    
-    protected $expect_quote_multi = "id = 1 AND foo = 'bar' AND zim IN('dib', 'gir', 'baz')";
+    protected $expect_quote_values_in = "foo = '\'bar\'' AND zim = '\'baz\''";
     
     protected $expect_quote_name_table_as_alias = '`table` AS `alias`';
     

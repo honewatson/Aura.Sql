@@ -99,7 +99,7 @@ class Gateway
         $connection = $this->connections->getWrite();
         $insert = $connection->newInsert();
         $this->mapper->modifyInsert($insert, $entity);
-        $connection->query($insert, $insert->getBind());
+        $connection->query($insert, $insert->getBindValues());
         return $connection->lastInsertId();
     }
 
@@ -121,7 +121,7 @@ class Gateway
         $connection = $this->connections->getWrite();
         $update = $connection->newUpdate();
         $this->mapper->modifyUpdate($update, $entity, $initial_data);
-        $stmt = $connection->query($update, $update->getBind());
+        $stmt = $connection->query($update, $update->getBindValues());
         return (bool) $stmt->rowCount();
     }
 
@@ -140,7 +140,7 @@ class Gateway
         $connection = $this->connections->getWrite();
         $delete = $connection->newDelete();
         $this->mapper->modifyDelete($delete, $entity);
-        $stmt = $connection->query($delete, $delete->getBind());
+        $stmt = $connection->query($delete, $delete->getBindValues());
         return (bool) $stmt->rowCount();
     }
 

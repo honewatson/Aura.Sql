@@ -1,6 +1,8 @@
 <?php
 namespace Aura\Sql\Connection;
 
+use Aura\Sql\Pdo\ExtendedPdo;
+
 class Mock extends AbstractConnection
 {
     protected $quote_name_prefix = '"';

@@ -3,6 +3,7 @@ namespace Aura\Sql\Mapper;
 
 use Aura\Sql\Assertions;
 use Aura\Sql\Connection\Mock;
+use Aura\Sql\Query\Factory as QueryFactory;
 
 class MapperTest extends \PHPUnit_Framework_TestCase
 {
@@ -10,11 +11,20 @@ class MapperTest extends \PHPUnit_Framework_TestCase
     
     protected $mapper;
 
+    protected $query_factory;
+    
     protected function setUp()
     {
-        $this->markTestSkipped('Skip until we inject QueryFactory instead of Connection.');
         parent::setUp();
         $this->mapper = new MockMapper;
+        $this->connection = new Mock(
+            'mock:host=default.example.com;dbname=test',
+            'default_user',
+            'default_pass',
+            [],
+            []
+        );
+        $this->query_factory = new QueryFactory;
     }
 
     protected function tearDown()
@@ -22,15 +32,9 @@ class MapperTest extends \PHPUnit_Framework_TestCase
         parent::tearDown();
     }
 
-    protected function newConnection()
+    protected function newQuery($type)
     {
-        return new Mock(
-            'mock:host=default.example.com;dbname=test',
-            'default_user',
-            'default_pass',
-            [],
-            []
-        );
+        return $this->query_factory->newInstance($type, $this->connection);
     }
     
     public function testGetCols()
@@ -158,8 +162,7 @@ class MapperTest extends \PHPUnit_Framework_TestCase
 
     public function testModifySelect()
     {
-        $connection = $this->newConnection();
-        $select = $connection->newSelect();
+        $select = $this->newQuery('select');
         $this->mapper->modifySelect($select);
         $actual = $select->__toString();
         $expect = '
@@ -190,8 +193,7 @@ class MapperTest extends \PHPUnit_Framework_TestCase
             'defaultIgnore' => null,
         ];
         
-        $connection = $this->newConnection();
-        $insert = $connection->newInsert();
+        $insert = $this->newQuery('insert');
         $this->mapper->modifyInsert($insert, $object);
         
         $actual = $insert->__toString();
@@ -216,7 +218,7 @@ class MapperTest extends \PHPUnit_Framework_TestCase
         ';
         $this->assertSameSql($expect, $actual);
         
-        $actual = $insert->getBind();
+        $actual = $insert->getBindValues();
         $expect = [
             'id' => null,
             'name' => 'Laura',
@@ -241,8 +243,7 @@ class MapperTest extends \PHPUnit_Framework_TestCase
             'defaultIgnore' => null,
         ];
         
-        $connection = $this->newConnection();
-        $update = $connection->newUpdate();
+        $update = $this->newQuery('update');
         $this->mapper->modifyUpdate($update, $object);
         
         $actual = $update->__toString();
@@ -261,7 +262,7 @@ class MapperTest extends \PHPUnit_Framework_TestCase
         ';
         $this->assertSameSql($expect, $actual);
         
-        $actual = $update->getBind();
+        $actual = $update->getBindValues();
         $expect = [
             'id' => 88,
             'name' => 'Laura',
@@ -296,8 +297,7 @@ class MapperTest extends \PHPUnit_Framework_TestCase
             'defaultIgnore' => null,
         ];
         
-        $connection = $this->newConnection();
-        $update = $connection->newUpdate();
+        $update = $this->newQuery('update');
         $this->mapper->modifyUpdate($update, $object, $initial_data);
         
         $actual = $update->__toString();
@@ -310,7 +310,7 @@ class MapperTest extends \PHPUnit_Framework_TestCase
         ';
         $this->assertSameSql($expect, $actual);
         
-        $actual = $update->getBind();
+        $actual = $update->getBindValues();
         $expect = [
             'name' => 'Laura',
         ];
@@ -329,8 +329,7 @@ class MapperTest extends \PHPUnit_Framework_TestCase
             'defaultIgnore' => null,
         ];
         
-        $connection = $this->newConnection();
-        $delete = $connection->newDelete();
+        $delete = $this->newQuery('delete');
         $this->mapper->modifyDelete($delete, $object);
         
         $actual = $delete->__toString();
@@ -341,7 +340,7 @@ class MapperTest extends \PHPUnit_Framework_TestCase
         ';
         $this->assertSameSql($expect, $actual);
         
-        $actual = $delete->getBind();
+        $actual = $delete->getBindValues();
         $expect = [];
         $this->assertSame($expect, $actual);
     }

@@ -22,13 +22,11 @@ abstract class AbstractConnectionTest extends \PHPUnit_Framework_TestCase
         'options'  => [],
     );
     
-    protected $expect_dsn_string;
-    
     protected $connection_type;
     
     protected $connection;
     
-    protected $table = 'aura_test_table';
+    protected $table;
     
     protected $expect_quote_scalar;
     
@@ -36,7 +34,7 @@ abstract class AbstractConnectionTest extends \PHPUnit_Framework_TestCase
     
     protected $expect_quote_into;
     
-    protected $expect_quote_into_many;
+    protected $expect_quote_values_in;
     
     protected $expect_quote_multi;
     
@@ -54,6 +52,9 @@ abstract class AbstractConnectionTest extends \PHPUnit_Framework_TestCase
         
         // the connection
         $this->connection = $this->db_setup->getConnection();
+        
+        // the table
+        $this->table = $this->db_setup->getTable();
     }
     
     public function testQuery()
@@ -204,11 +205,11 @@ abstract class AbstractConnectionTest extends \PHPUnit_Framework_TestCase
         
         // many placeholders, many values
         $actual = $this->connection->quoteValuesIn("foo = ? AND zim = ?", ["'bar'", "'baz'"]);
-        $this->assertEquals($this->expect_quote_into_many, $actual);
+        $this->assertEquals($this->expect_quote_values_in, $actual);
         
         // many placeholders, too many values
         $actual = $this->connection->quoteValuesIn("foo = ? AND zim = ?", ["'bar'", "'baz'", "'gir'"]);
-        $this->assertEquals($this->expect_quote_into_many, $actual);
+        $this->assertEquals($this->expect_quote_values_in, $actual);
     }
     
     public function testQuoteName()

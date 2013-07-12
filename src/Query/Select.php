@@ -584,6 +584,42 @@ class Select extends AbstractQuery
         return $this;
     }
 
+    public function fetchAll()
+    {
+        $this->connection->bindValues($this->getBindValues());
+        return $this->connection->fetchAll($this->__toString());
+    }
+    
+    public function fetchAssoc()
+    {
+        $this->connection->bindValues($this->getBindValues());
+        return $this->connection->fetchAssoc($this->__toString());
+    }
+    
+    public function fetchCol()
+    {
+        $this->connection->bindValues($this->getBindValues());
+        return $this->connection->fetchCol($this->__toString());
+    }
+    
+    public function fetchOne()
+    {
+        $this->connection->bindValues($this->getBindValues());
+        return $this->connection->fetchOne($this->__toString());
+    }
+    
+    public function fetchPairs()
+    {
+        $this->connection->bindValues($this->getBindValues());
+        return $this->connection->fetchPairs($this->__toString());
+    }
+    
+    public function fetchValue()
+    {
+        $this->connection->bindValues($this->getBindValues());
+        return $this->connection->fetchValue($this->__toString());
+    }
+    
     /**
      * 
      * Clears the current select properties; generally used after adding a

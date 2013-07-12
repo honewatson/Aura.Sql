@@ -60,4 +60,9 @@ class Insert extends AbstractQuery
         $this->table = $this->connection->quoteName($table);
         return $this;
     }
+    
+    public function lastInsertId($col)
+    {
+        return $this->connection->lastInsertId($this->table, $col);
+    }
 }

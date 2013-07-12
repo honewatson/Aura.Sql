@@ -32,12 +32,12 @@ abstract class AbstractQuery
 
     /**
      * 
-     * Data to be bound to the query.
+     * Values to bind to the query.
      * 
      * @var array
      * 
      */
-    protected $bind = [];
+    protected $bind_values = [];
 
     /**
      * 
@@ -108,21 +108,6 @@ abstract class AbstractQuery
 
     /**
      * 
-     * Sets values to bind into the query; this overrides any previous
-     * bindings.
-     * 
-     * @param array $bind Values to bind to the query.
-     * 
-     * @return void
-     * 
-     */
-    public function setBind(array $bind)
-    {
-        $this->bind = $bind;
-    }
-
-    /**
-     * 
      * Adds values to bind into the query; merges with existing values.
      * 
      * @param array $bind Values to bind to the query.
@@ -130,9 +115,9 @@ abstract class AbstractQuery
      * @return void
      * 
      */
-    public function addBind(array $bind)
+    public function bindValues(array $bind_values)
     {
-        $this->bind = array_merge($this->bind, $bind);
+        $this->bind_values = array_merge($this->bind_values, $bind_values);
     }
 
     /**
@@ -142,8 +127,30 @@ abstract class AbstractQuery
      * @return array
      * 
      */
-    public function getBind()
+    public function getBindValues()
     {
-        return $this->bind;
+        return $this->bind_values;
+    }
+    
+    /**
+     * 
+     * Executes the query and returns the number of rows affected.
+     * 
+     */
+    public function exec()
+    {
+        $this->connection->bindValues($this->getBindValues());
+        return $this->connection->exec($this->__toString());
+    }
+    
+    /**
+     * 
+     * Executes the query and returns a PDOStatement.
+     * 
+     */
+    public function query()
+    {
+        $this->connection->bindValues($this->getBindValues());
+        return $this->connection->query($this->__toString());
     }
 }
