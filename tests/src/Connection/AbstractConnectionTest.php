@@ -256,4 +256,21 @@ abstract class AbstractConnectionTest extends \PHPUnit_Framework_TestCase
         $expect = 'SELECT * FROM whatever LIMIT 10 OFFSET 20';
         $this->assertSame($expect, $actual);
     }
+    
+    public function testLastInsertId()
+    {
+        $statement = "INSERT INTO {$this->table} (name) VALUES (:name)";
+        $this->connection->bindValues(['name' => 'Lora']);
+        $this->connection->exec($statement);
+        
+        // did we get the right last ID?
+        $actual = $this->connection->lastInsertId($this->table, 'id');
+        $expect = '11';
+        $this->assertEquals($expect, $actual);
+        
+        // did it insert?
+        $actual = $this->connection->fetchOne("SELECT id, name FROM {$this->table} WHERE id = 11");
+        $expect = ['id' => '11', 'name' => 'Lora'];
+        $this->assertEquals($actual, $expect);
+    }
 }
