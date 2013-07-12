@@ -1,7 +1,7 @@
 <?php
 namespace Aura\Sql\Query;
 
-use Aura\Sql\ConnectionFactory;
+use Aura\Sql\Connection\ConnectionFactory;
 use Aura\Sql\Query\Factory as QueryFactory;
 use Aura\Sql\Assertions;
 
@@ -19,9 +19,9 @@ abstract class AbstractQueryTest extends \PHPUnit_Framework_TestCase
     {
         parent::setUp();
         $connection_factory = new ConnectionFactory;
-        $query_factory   = new QueryFactory;
-        $this->connection   = $connection_factory->newInstance('sqlite', ':memory:');
-        $this->query     = $query_factory->newInstance(
+        $query_factory = new QueryFactory;
+        $this->connection = $connection_factory->newInstance('sqlite', ':memory:');
+        $this->query = $query_factory->newInstance(
             $this->query_type,
             $this->connection
         );

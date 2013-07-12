@@ -231,7 +231,7 @@ class SelectTest extends AbstractQueryTest
         $this->assertSameSql($expect, $actual);
     }
     
-    public function testLimit()
+    public function testLimitOffset()
     {
         $this->query->limit(10);
         $expect = '
@@ -240,14 +240,11 @@ class SelectTest extends AbstractQueryTest
         ';
         $actual = $this->query->__toString();
         $this->assertSameSql($expect, $actual);
-    }
-    
-    public function testOffset()
-    {
+        
         $this->query->offset(40);
         $expect = '
             SELECT
-            OFFSET 40
+            LIMIT 10 OFFSET 40
         ';
         $actual = $this->query->__toString();
         $this->assertSameSql($expect, $actual);
