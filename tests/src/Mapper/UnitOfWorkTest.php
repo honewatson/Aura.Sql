@@ -1,14 +1,12 @@
 <?php
 namespace Aura\Sql\Mapper;
 
-use Aura\Sql\Connection\ConnectionFactory;
 use Aura\Sql\Connection\ConnectionLocator;
+use Aura\Sql\DbSetup;
 
 class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
 {
     protected $work;
-    
-    protected $factory;
     
     protected $connections;
     
@@ -18,20 +16,14 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
     
     protected $gateways;
     
-    protected $default = [
-        'adapter' => 'sqlite',
-        'dsn'        => ':memory:',
-    ];
-    
     protected function setUp()
     {
         parent::setUp();
         
-        $this->factory = new ConnectionFactory;
+        $db_setup = new DbSetup\Sqlite;
         
         $this->connections = new ConnectionLocator(
-            $this->factory,
-            $this->default,
+            function () use ($db_setup) { return $db_setup->getConnection(); },
             [],
             []
         );
@@ -46,13 +38,6 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
         
         $this->work = new UnitOfWork($this->gateways);
         
-        $db_setup_class = 'Aura\Sql\DbSetup\Sqlite';
-        $db_setup = new $db_setup_class(
-            // $this->connections->getWrite(),
-            // $this->mapper->getTable(),
-            // 'aura_test_schema1',
-            // 'aura_test_schema2'
-        );
     }
 
     protected function tearDown()

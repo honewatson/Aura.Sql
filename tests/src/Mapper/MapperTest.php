@@ -4,7 +4,7 @@ namespace Aura\Sql\Mapper;
 use Aura\Sql\Assertions;
 use Aura\Sql\Connection\ConnectionFactory;
 
-class AbstractMapperTest extends \PHPUnit_Framework_TestCase
+class MapperTest extends \PHPUnit_Framework_TestCase
 {
     use Assertions;
     
@@ -162,18 +162,18 @@ class AbstractMapperTest extends \PHPUnit_Framework_TestCase
         $select = $connection->newSelect();
         $this->mapper->modifySelect($select);
         $actual = $select->__toString();
-        $expect = "
+        $expect = '
             SELECT
-                aura_test_table.id AS identity,
-                aura_test_table.name AS firstName,
-                aura_test_table.test_size_scale AS sizeScale,
-                aura_test_table.test_default_null AS defaultNull,
-                aura_test_table.test_default_string AS defaultString,
-                aura_test_table.test_default_number AS defaultNumber,
-                aura_test_table.test_default_ignore AS defaultIgnore
+                "aura_test_table"."id" AS "identity",
+                "aura_test_table"."name" AS "firstName",
+                "aura_test_table"."test_size_scale" AS "sizeScale",
+                "aura_test_table"."test_default_null" AS "defaultNull",
+                "aura_test_table"."test_default_string" AS "defaultString",
+                "aura_test_table"."test_default_number" AS "defaultNumber",
+                "aura_test_table"."test_default_ignore" AS "defaultIgnore"
             FROM
-                aura_test_table
-        ";
+                "aura_test_table"
+        ';
         
         $this->assertSameSql($expect, $actual);
     }
@@ -195,15 +195,15 @@ class AbstractMapperTest extends \PHPUnit_Framework_TestCase
         $this->mapper->modifyInsert($insert, $object);
         
         $actual = $insert->__toString();
-        $expect = "
-            INSERT INTO aura_test_table (
-                id,
-                name,
-                test_size_scale,
-                test_default_null,
-                test_default_string,
-                test_default_number,
-                test_default_ignore
+        $expect = '
+            INSERT INTO "aura_test_table" (
+                "id",
+                "name",
+                "test_size_scale",
+                "test_default_null",
+                "test_default_string",
+                "test_default_number",
+                "test_default_ignore"
             ) VALUES (
                 :id,
                 :name,
@@ -213,7 +213,7 @@ class AbstractMapperTest extends \PHPUnit_Framework_TestCase
                 :test_default_number,
                 :test_default_ignore
             )
-        ";
+        ';
         $this->assertSameSql($expect, $actual);
         
         $actual = $insert->getBind();
@@ -246,19 +246,19 @@ class AbstractMapperTest extends \PHPUnit_Framework_TestCase
         $this->mapper->modifyUpdate($update, $object);
         
         $actual = $update->__toString();
-        $expect = "
-            UPDATE aura_test_table
+        $expect = '
+            UPDATE "aura_test_table"
             SET
-                id = :id,
-                name = :name,
-                test_size_scale = :test_size_scale,
-                test_default_null = :test_default_null,
-                test_default_string = :test_default_string,
-                test_default_number = :test_default_number,
-                test_default_ignore = :test_default_ignore
+                "id" = :id,
+                "name" = :name,
+                "test_size_scale" = :test_size_scale,
+                "test_default_null" = :test_default_null,
+                "test_default_string" = :test_default_string,
+                "test_default_number" = :test_default_number,
+                "test_default_ignore" = :test_default_ignore
             WHERE
-                id = 88
-        ";
+                "aura_test_table"."id" = \'88\'
+        ';
         $this->assertSameSql($expect, $actual);
         
         $actual = $update->getBind();
@@ -301,13 +301,13 @@ class AbstractMapperTest extends \PHPUnit_Framework_TestCase
         $this->mapper->modifyUpdate($update, $object, $initial_data);
         
         $actual = $update->__toString();
-        $expect = "
-            UPDATE aura_test_table
+        $expect = '
+            UPDATE "aura_test_table"
             SET
-                name = :name
+                "name" = :name
             WHERE
-                id = 88
-        ";
+                "aura_test_table"."id" = \'88\'
+        ';
         $this->assertSameSql($expect, $actual);
         
         $actual = $update->getBind();
@@ -334,11 +334,11 @@ class AbstractMapperTest extends \PHPUnit_Framework_TestCase
         $this->mapper->modifyDelete($delete, $object);
         
         $actual = $delete->__toString();
-        $expect = "
-            DELETE FROM aura_test_table
+        $expect = '
+            DELETE FROM "aura_test_table"
             WHERE
-                id = 88
-        ";
+                "aura_test_table"."id" = \'88\'
+        ';
         $this->assertSameSql($expect, $actual);
         
         $actual = $delete->getBind();

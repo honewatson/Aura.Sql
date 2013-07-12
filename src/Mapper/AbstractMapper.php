@@ -296,7 +296,7 @@ abstract class AbstractMapper
         $update->cols(array_keys($data));
         $update->addBind($data);
         $update->where(
-            $this->getPrimaryCol() . ' = ?',
+            $this->getTablePrimaryCol() . ' = ?',
             $this->getIdentityValue($entity)
         );
     }
@@ -318,7 +318,7 @@ abstract class AbstractMapper
     {
         $delete->from($this->table);
         $delete->where(
-            $this->getPrimaryCol() . ' = ?',
+            $this->getTablePrimaryCol() . ' = ?',
             $this->getIdentityValue($entity)
         );
     }
