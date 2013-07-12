@@ -8,7 +8,7 @@
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
  */
-namespace Aura\Sql;
+namespace Aura\Sql\Schema;
 
 /**
  * 
@@ -179,7 +179,7 @@ class Column
      */
     public static function __set_state($array)
     {
-        $column = new \Aura\Sql\Column(
+        $column = new \Aura\Sql\Schema\Column(
             $array['name'],
             $array['type'],
             $array['size'],

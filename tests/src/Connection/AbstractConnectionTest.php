@@ -61,20 +61,6 @@ abstract class AbstractConnectionTest extends \PHPUnit_Framework_TestCase
             $this->markTestSkipped("Extension '{$this->extension}' not loaded.");
         }
         
-        // convert column arrays to objects
-        foreach ($this->expect_fetch_table_cols as $name => $info) {
-            $this->expect_fetch_table_cols[$name] = new Column(
-                $info['name'],
-                $info['type'],
-                $info['size'],
-                $info['scale'],
-                $info['notnull'],
-                $info['default'],
-                $info['autoinc'],
-                $info['primary']
-            );
-        }
-        
         // load test config values
         $test_class = get_class($this);
         $this->connection_params = array_merge(

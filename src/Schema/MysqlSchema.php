@@ -1,70 +1,11 @@
 <?php
-/**
- * 
- * This file is part of the Aura Project for PHP.
- * 
- * @package Aura.Sql
- * 
- * @license http://opensource.org/licenses/bsd-license.php BSD
- * 
- */
-namespace Aura\Sql\Connection;
+namespace Aura\Sql\Schema;
 
-/**
- * 
- * MySQL connection adapter.
- * 
- * @package Aura.Sql
- * 
- */
-class Mysql extends AbstractConnection
+class MysqlSchema extends AbstractSchema
 {
     /**
      * 
-     * The PDO DSN for the connection. This can be an array of key-value pairs
-     * or a string (minus the PDO type prefix).
-     * 
-     * @var string|array
-     * 
-     */
-    protected $dsn = [
-        'host' => null,
-        'port' => null,
-        'dbname' => null,
-        'unix_socket' => null,
-        'charset' => null,
-    ];
-
-    /**
-     * 
-     * The PDO type prefix.
-     * 
-     * @var string
-     * 
-     */
-    protected $dsn_prefix = 'mysql';
-
-    /**
-     * 
-     * The prefix to use when quoting identifier names.
-     * 
-     * @var string
-     * 
-     */
-    protected $quote_name_prefix = '`';
-
-    /**
-     * 
-     * The suffix to use when quoting identifier names.
-     * 
-     * @var string
-     * 
-     */
-    protected $quote_name_suffix = '`';
-
-    /**
-     * 
-     * Returns an list of tables in the database.
+     * Returns a list of tables in the database.
      * 
      * @param string $schema Optionally, pass a schema name to get the list
      * of tables in this schema.
@@ -76,9 +17,9 @@ class Mysql extends AbstractConnection
     {
         $text = 'SHOW TABLES';
         if ($schema) {
-            $text .= ' IN ' . $this->replaceName($schema);
+            $text .= ' IN ' . $this->connection->quoteName($schema);
         }
-        return $this->fetchCol($text);
+        return $this->connection->fetchCol($text);
     }
 
     /**
@@ -96,17 +37,17 @@ class Mysql extends AbstractConnection
     {
         list($schema, $table) = $this->splitName($spec);
 
-        $table = $this->quoteName($table);
+        $table = $this->connection->quoteName($table);
         $text = "SHOW COLUMNS FROM $table";
 
         if ($schema) {
             $schema = preg_replace('/[^\w]/', '', $schema);
-            $schema = $this->replaceName($schema);
+            $schema = $this->connection->quoteName($schema);
             $text .= " IN $schema";
         }
 
         // get the column descriptions
-        $raw_cols = $this->fetchAll($text);
+        $raw_cols = $this->connection->fetchAll($text);
 
         // where the column info will be stored
         $cols = [];
@@ -155,16 +96,4 @@ class Mysql extends AbstractConnection
         }
     }
 
-    /**
-     * 
-     * Returns the last ID inserted on the connection.
-     * 
-     * @return mixed
-     * 
-     */
-    public function lastInsertId()
-    {
-        $pdo = $this->getPdo();
-        return $pdo->lastInsertId();
-    }
 }

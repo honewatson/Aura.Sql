@@ -1,5 +1,5 @@
 <?php
-namespace Aura\Sql;
+namespace Aura\Sql\Schema;
 
 class ColumnTest extends \PHPUnit_Framework_TestCase
 {
