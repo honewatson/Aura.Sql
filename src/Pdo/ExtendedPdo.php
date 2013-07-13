@@ -28,6 +28,8 @@ use PDO;
  *   values, execute, and then fetch from the prepared statement. All of the
  *   fetch*() methods take an array of values to bind to to the query.
  * 
+ * By defult, it starts in the ERRMODE_EXCEPTION instead of ERRMODE_SILENT.
+ * 
  */
 class ExtendedPdo extends PDO implements ExtendedPdoInterface
 {
@@ -72,11 +74,16 @@ class ExtendedPdo extends PDO implements ExtendedPdoInterface
         array $options = null,
         array $attributes = []
     ) {
-        $this->dsn        = $dsn;
-        $this->username   = $username;
-        $this->password   = $password;
-        $this->options    = $options;
-        $this->attributes = $attributes;
+        $this->dsn      = $dsn;
+        $this->username = $username;
+        $this->password = $password;
+        $this->options  = $options;
+        
+        // can't use array_merge, as it will renumber keys
+        $this->attributes = [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION];
+        foreach ($attributes as $attribute => $value) {
+            $this->attributes[$attribute] = $value;
+        }
     }
     
     /**

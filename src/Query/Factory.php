@@ -21,6 +21,26 @@ use Aura\Sql\Connection\AbstractConnection;
  */
 class Factory
 {
+    public function newDelete(AbstractConnection $connection)
+    {
+        return $this->newInstance('Delete', $connection);
+    }
+    
+    public function newInsert(AbstractConnection $connection)
+    {
+        return $this->newInstance('Insert', $connection);
+    }
+    
+    public function newSelect(AbstractConnection $connection)
+    {
+        return $this->newInstance('Select', $connection);
+    }
+    
+    public function newUpdate(AbstractConnection $connection)
+    {
+        return $this->newInstance('Update', $connection);
+    }
+    
     /**
      * 
      * Returns a new query object.

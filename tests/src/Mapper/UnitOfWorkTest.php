@@ -3,6 +3,7 @@ namespace Aura\Sql\Mapper;
 
 use Aura\Sql\Connection\ConnectionLocator;
 use Aura\Sql\DbSetup;
+use Aura\Sql\Query\Factory as QueryFactory;
 
 class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
 {
@@ -18,7 +19,6 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
     
     protected function setUp()
     {
-        $this->markTestSkipped('Skip until we inject QueryFactory instead of Connection.');
         parent::setUp();
         
         $db_setup = new DbSetup\Sqlite;
@@ -29,9 +29,15 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
             []
         );
         
+        $this->query_factory = new QueryFactory;
+        
         $this->mapper = new MockMapper;
         
-        $this->gateway = new Gateway($this->connections, $this->mapper);
+        $this->gateway = new Gateway(
+            $this->connections,
+            $this->query_factory,
+            $this->mapper
+        );
         
         $this->gateways = new GatewayLocator([
             'mock' => function () { return $this->gateway; },
@@ -65,9 +71,8 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
     public function testUpdate()
     {
         // get the entity
-        $select = $this->gateway->newSelect();
-        $select->where('name = ?', 'Anna');
-        $entity = new MockEntity($this->gateway->fetchOne($select));
+        $data = $this->gateway->fetchOneBy('name', 'Anna');
+        $entity = new MockEntity($data);
         
         // modify it and attach for update
         $entity->firstName = 'Annabelle';
@@ -90,9 +95,8 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
     public function testDelete()
     {
         // get the entity
-        $select = $this->gateway->newSelect();
-        $select->where('name = ?', 'Anna');
-        $entity = new MockEntity($this->gateway->fetchOne($select));
+        $data = $this->gateway->fetchOneBy('name', 'Anna');
+        $entity = new MockEntity($data);
         
         // attach for delete
         $this->work->delete('mock', $entity);
@@ -152,16 +156,12 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
         $this->work->insert('mock', $coll[0]);
         
         // update
-        $select = $this->gateway->newSelect();
-        $select->where('name = ?', 'Anna');
-        $coll[1] = new MockEntity($this->gateway->fetchOne($select));
+        $coll[1] = new MockEntity($this->gateway->fetchOneBy('name', 'Anna'));
         $coll[1]->firstName = 'Annabelle';
         $this->work->update('mock', $coll[1]);
         
         // delete
-        $select = $this->gateway->newSelect();
-        $select->where('name = ?', 'Betty');
-        $coll[2] = new MockEntity($this->gateway->fetchOne($select));
+        $coll[2] = new MockEntity($this->gateway->fetchOneBy('name', 'Betty'));
         $this->work->delete('mock', $coll[2]);
         
         // execute
