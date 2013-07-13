@@ -24,7 +24,7 @@ abstract class AbstractDbSetup
         $setup_class = 'Aura\Sql\DbSetup' . $type;
         $connection_params = $GLOBALS[$setup_class]['connection_params'];
         
-        $connection_class = 'Aura\Sql\Connection' . $type;
+        $connection_class = 'Aura\Sql\Connection' . $type . 'Connection';
         $this->connection = new $connection_class(
             $connection_params['dsn'],
             $connection_params['username'],

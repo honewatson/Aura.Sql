@@ -12,12 +12,12 @@ namespace Aura\Sql\Connection;
 
 /**
  * 
- * MySQL connection adapter.
+ * PostgreSQL connection adapter.
  * 
  * @package Aura.Sql
  * 
  */
-class Mysql extends AbstractConnection
+class PgsqlConnection extends AbstractConnection
 {
     /**
      * 
@@ -26,7 +26,7 @@ class Mysql extends AbstractConnection
      * @var string
      * 
      */
-    protected $quote_name_prefix = '`';
+    protected $quote_name_prefix = '"';
 
     /**
      * 
@@ -35,5 +35,10 @@ class Mysql extends AbstractConnection
      * @var string
      * 
      */
-    protected $quote_name_suffix = '`';
+    protected $quote_name_suffix = '"';
+
+    public function getLastInsertIdName($table = null, $col = null)
+    {
+        return $this->quoteName("{$table}_{$col}_seq");
+    }
 }

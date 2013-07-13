@@ -5,7 +5,7 @@ use Aura\Sql\Assertions;
 use Aura\Sql\Pdo\ExtendedPdo;
 use Aura\Sql\Profiler;
 use Aura\Sql\Query\QueryFactory;
-use Aura\Sql\Connection\Sqlite;
+use Aura\Sql\Connection\SqliteConnection;
 
 abstract class AbstractQueryTest extends \PHPUnit_Framework_TestCase
 {
@@ -20,7 +20,7 @@ abstract class AbstractQueryTest extends \PHPUnit_Framework_TestCase
     protected function setUp()
     {
         parent::setUp();
-        $this->connection = new Sqlite('sqlite::memory:');
+        $this->connection = new SqliteConnection('sqlite::memory:');
         $query_factory = new QueryFactory;
         $method = 'new' . $this->query_type;
         $this->query = $query_factory->$method($this->connection);

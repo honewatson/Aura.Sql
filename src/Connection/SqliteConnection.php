@@ -17,26 +17,8 @@ namespace Aura\Sql\Connection;
  * @package Aura.Sql
  * 
  */
-class Sqlite extends AbstractConnection
+class SqliteConnection extends AbstractConnection
 {
-    /**
-     * 
-     * The PDO DSN for the connection, typically a file path.
-     * 
-     * @var string
-     * 
-     */
-    protected $dsn = null;
-
-    /**
-     * 
-     * The PDO type prefix.
-     * 
-     * @var string
-     * 
-     */
-    protected $dsn_prefix = 'sqlite';
-
     /**
      * 
      * The quote character before an entity name (table, index, etc).
