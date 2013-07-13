@@ -34,7 +34,8 @@ class MapperTest extends \PHPUnit_Framework_TestCase
 
     protected function newQuery($type)
     {
-        return $this->query_factory->newInstance($type, $this->connection);
+        $method = 'new' . $type;
+        return $this->query_factory->$method($this->connection);
     }
     
     public function testGetCols()
@@ -162,7 +163,7 @@ class MapperTest extends \PHPUnit_Framework_TestCase
 
     public function testModifySelect()
     {
-        $select = $this->newQuery('select');
+        $select = $this->newQuery('Select');
         $this->mapper->modifySelect($select);
         $actual = $select->__toString();
         $expect = '
@@ -193,7 +194,7 @@ class MapperTest extends \PHPUnit_Framework_TestCase
             'defaultIgnore' => null,
         ];
         
-        $insert = $this->newQuery('insert');
+        $insert = $this->newQuery('Insert');
         $this->mapper->modifyInsert($insert, $object);
         
         $actual = $insert->__toString();
@@ -243,7 +244,7 @@ class MapperTest extends \PHPUnit_Framework_TestCase
             'defaultIgnore' => null,
         ];
         
-        $update = $this->newQuery('update');
+        $update = $this->newQuery('Update');
         $this->mapper->modifyUpdate($update, $object);
         
         $actual = $update->__toString();
@@ -297,7 +298,7 @@ class MapperTest extends \PHPUnit_Framework_TestCase
             'defaultIgnore' => null,
         ];
         
-        $update = $this->newQuery('update');
+        $update = $this->newQuery('Update');
         $this->mapper->modifyUpdate($update, $object, $initial_data);
         
         $actual = $update->__toString();
@@ -329,7 +330,7 @@ class MapperTest extends \PHPUnit_Framework_TestCase
             'defaultIgnore' => null,
         ];
         
-        $delete = $this->newQuery('delete');
+        $delete = $this->newQuery('Delete');
         $this->mapper->modifyDelete($delete, $object);
         
         $actual = $delete->__toString();

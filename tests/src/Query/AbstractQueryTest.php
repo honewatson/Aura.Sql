@@ -22,10 +22,8 @@ abstract class AbstractQueryTest extends \PHPUnit_Framework_TestCase
         parent::setUp();
         $this->connection = new Sqlite('sqlite::memory:');
         $query_factory = new QueryFactory;
-        $this->query = $query_factory->newInstance(
-            $this->query_type,
-            $this->connection
-        );
+        $method = 'new' . $this->query_type;
+        $this->query = $query_factory->$method($this->connection);
     }
     
     protected function tearDown()

@@ -23,38 +23,21 @@ class QueryFactory
 {
     public function newDelete(AbstractConnection $connection)
     {
-        return $this->newInstance('Delete', $connection);
+        return new Delete($connection);
     }
     
     public function newInsert(AbstractConnection $connection)
     {
-        return $this->newInstance('Insert', $connection);
+        return new Insert($connection);
     }
     
     public function newSelect(AbstractConnection $connection)
     {
-        return $this->newInstance('Select', $connection);
+        return new Select($connection);
     }
     
     public function newUpdate(AbstractConnection $connection)
     {
-        return $this->newInstance('Update', $connection);
-    }
-    
-    /**
-     * 
-     * Returns a new query object.
-     * 
-     * @param string $type The query object type.
-     * 
-     * @param AbstractConnection $connection The SQL connection.
-     * 
-     * @return AbstractQuery
-     * 
-     */
-    public function newInstance($type, AbstractConnection $connection)
-    {
-        $class = '\Aura\Sql\Query\\' . ucfirst($type);
-        return new $class($connection);
+        return new Update($connection);
     }
 }
