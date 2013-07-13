@@ -4,7 +4,7 @@ namespace Aura\Sql\Mapper;
 use Aura\Sql\Assertions;
 use Aura\Sql\Connection\ConnectionLocator;
 use Aura\Sql\DbSetup;
-use Aura\Sql\Query\Factory as QueryFactory;
+use Aura\Sql\Query\QueryFactory;
 
 class GatewayTest extends \PHPUnit_Framework_TestCase
 {

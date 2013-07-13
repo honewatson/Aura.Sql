@@ -19,7 +19,7 @@ use Aura\Sql\Connection\AbstractConnection;
  * @package Aura.Sql
  * 
  */
-class Factory
+class QueryFactory
 {
     public function newDelete(AbstractConnection $connection)
     {

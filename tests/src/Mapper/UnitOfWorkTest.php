@@ -3,7 +3,7 @@ namespace Aura\Sql\Mapper;
 
 use Aura\Sql\Connection\ConnectionLocator;
 use Aura\Sql\DbSetup;
-use Aura\Sql\Query\Factory as QueryFactory;
+use Aura\Sql\Query\QueryFactory;
 
 class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
 {

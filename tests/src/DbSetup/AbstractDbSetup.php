@@ -2,7 +2,7 @@
 namespace Aura\Sql\DbSetup;
 
 use Aura\Sql\Profiler;
-use Aura\Sql\Query\Factory as QueryFactory;
+use Aura\Sql\Query\QueryFactory;
 
 abstract class AbstractDbSetup
 {

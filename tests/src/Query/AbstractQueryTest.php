@@ -4,7 +4,7 @@ namespace Aura\Sql\Query;
 use Aura\Sql\Assertions;
 use Aura\Sql\Pdo\ExtendedPdo;
 use Aura\Sql\Profiler;
-use Aura\Sql\Query\Factory as QueryFactory;
+use Aura\Sql\Query\QueryFactory;
 use Aura\Sql\Connection\Sqlite;
 
 abstract class AbstractQueryTest extends \PHPUnit_Framework_TestCase

@@ -11,7 +11,7 @@
 namespace Aura\Sql\Mapper;
 
 use Aura\Sql\Connection\ConnectionLocator;
-use Aura\Sql\Query\Factory as QueryFactory;
+use Aura\Sql\Query\QueryFactory;
 
 /**
  * 
