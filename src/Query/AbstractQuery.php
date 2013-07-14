@@ -10,7 +10,7 @@
  */
 namespace Aura\Sql\Query;
 
-use Aura\Sql\Connection\AbstractConnection;
+use Aura\Sql\Connection\ConnectionInterface;
 
 /**
  * 
@@ -25,7 +25,7 @@ abstract class AbstractQuery
      * 
      * An SQL connection.
      * 
-     * @var AbstractConnection
+     * @var ConnectionInterface
      * 
      */
     protected $connection;
@@ -43,12 +43,12 @@ abstract class AbstractQuery
      * 
      * Constructor.
      * 
-     * @param AbstractConnection $connection An SQL connection.
+     * @param ConnectionInterface $connection An SQL connection.
      * 
      * @return void
      * 
      */
-    public function __construct(AbstractConnection $connection)
+    public function __construct(ConnectionInterface $connection)
     {
         $this->connection = $connection;
     }
@@ -66,7 +66,7 @@ abstract class AbstractQuery
      * 
      * Gets the database connection for this query object.
      * 
-     * @return AbstractConnection
+     * @return ConnectionInterface
      * 
      */
     public function getConnection()

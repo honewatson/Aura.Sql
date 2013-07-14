@@ -10,7 +10,7 @@
  */
 namespace Aura\Sql\Query;
 
-use Aura\Sql\Connection\AbstractConnection;
+use Aura\Sql\Connection\ConnectionInterface;
 
 /**
  * 
@@ -19,24 +19,24 @@ use Aura\Sql\Connection\AbstractConnection;
  * @package Aura.Sql
  * 
  */
-class QueryFactory
+class QueryFactory implements QueryFactoryInterface
 {
-    public function newDelete(AbstractConnection $connection)
+    public function newDelete(ConnectionInterface $connection)
     {
         return new Delete($connection);
     }
     
-    public function newInsert(AbstractConnection $connection)
+    public function newInsert(ConnectionInterface $connection)
     {
         return new Insert($connection);
     }
     
-    public function newSelect(AbstractConnection $connection)
+    public function newSelect(ConnectionInterface $connection)
     {
         return new Select($connection);
     }
     
-    public function newUpdate(AbstractConnection $connection)
+    public function newUpdate(ConnectionInterface $connection)
     {
         return new Update($connection);
     }

@@ -10,8 +10,8 @@
  */
 namespace Aura\Sql\Mapper;
 
-use Aura\Sql\Connection\ConnectionLocator;
-use Aura\Sql\Query\QueryFactory;
+use Aura\Sql\Connection\ConnectionLocatorInterface;
+use Aura\Sql\Query\QueryFactoryInterface;
 
 /**
  * 
@@ -26,7 +26,7 @@ class Gateway
      * 
      * A ConnectionLocator for database connections.
      * 
-     * @var ConnectionLocator
+     * @var ConnectionLocatorInterface
      * 
      */
     protected $connections;
@@ -35,7 +35,7 @@ class Gateway
      * 
      * A mapper between this table gateway and entities.
      * 
-     * @var AbstractMapper
+     * @var MapperInterface
      * 
      */
     protected $mapper;
@@ -44,16 +44,16 @@ class Gateway
      * 
      * Constructor.
      * 
-     * @param ConnectionLocator $connections A ConnectionLocator for database
+     * @param ConnectionLocatorInterface $connections A ConnectionLocator for database
      * connections.
      * 
-     * @param AbstractMapper $mapper A table-to-entity mapper.
+     * @param MapperInterface $mapper A table-to-entity mapper.
      * 
      */
     public function __construct(
-        ConnectionLocator $connections,
-        QueryFactory $query_factory,
-        AbstractMapper $mapper
+        ConnectionLocatorInterface $connections,
+        QueryFactoryInterface $query_factory,
+        MapperInterface $mapper
     ) {
         $this->connections = $connections;
         $this->query_factory = $query_factory;
@@ -64,7 +64,7 @@ class Gateway
      * 
      * Gets the connection locator.
      * 
-     * @return ConnectionLocator
+     * @return ConnectionLocatorInterface
      * 
      */
     public function getConnections()
@@ -76,7 +76,7 @@ class Gateway
      * 
      * Gets the query factory.
      * 
-     * @return QueryFactory
+     * @return QueryFactoryInterface
      * 
      */
     public function getQueryFactory()
@@ -88,7 +88,7 @@ class Gateway
      * 
      * Gets the mapper.
      * 
-     * @return AbstractMapper
+     * @return MapperInterface
      * 
      */
     public function getMapper()

@@ -10,8 +10,6 @@
  */
 namespace Aura\Sql\Query;
 
-use Aura\Sql\Connection\AbstractConnection;
-
 /**
  * 
  * An object for SELECT queries.

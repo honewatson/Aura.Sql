@@ -19,7 +19,7 @@ use Aura\Sql\Pdo\ExtendedPdo;
  * @package Aura.Sql
  * 
  */
-abstract class AbstractConnection extends ExtendedPdo
+abstract class AbstractConnection extends ExtendedPdo implements ConnectionInterface
 {
     /**
      * 

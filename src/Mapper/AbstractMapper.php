@@ -22,7 +22,7 @@ use Aura\Sql\Query\Update;
  * @package Aura.Sql
  * 
  */
-abstract class AbstractMapper
+abstract class AbstractMapper implements MapperInterface
 {
     /**
      * 

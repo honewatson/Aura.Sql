@@ -1,7 +1,7 @@
 <?php
 namespace Aura\Sql\Schema;
 
-use Aura\Sql\Connection\AbstractConnection;
+use Aura\Sql\Connection\ConnectionInterface;
 
 abstract class AbstractSchema
 {
@@ -18,13 +18,13 @@ abstract class AbstractSchema
      * 
      * Constructor.
      * 
-     * @param AbstractConnection $connection A database connection.
+     * @param ConnectionInterface $connection A database connection.
      * 
      * @param ColumnFactory $column_factory A column object factory.
      * 
      */
     public function __construct(
-        AbstractConnection $connection,
+        ConnectionInterface $connection,
         ColumnFactory $column_factory
     ) {
         $this->connection = $connection;

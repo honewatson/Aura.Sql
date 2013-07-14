@@ -17,7 +17,7 @@ namespace Aura\Sql\Connection;
  * @package Aura.Sql
  * 
  */
-class ConnectionLocator
+class ConnectionLocator implements ConnectionLocatorInterface
 {
     /**
      * 
