@@ -142,51 +142,51 @@ abstract class AbstractConnection extends ExtendedPdo implements ConnectionInter
      * If the name contains a dot, this method will separately quote the
      * parts before and after the dot.
      * 
-     * @param string $spec The identifier name to quote.
+     * @param string $name The identifier name to quote.
      * 
      * @return string|array The quoted identifier name.
      * 
      * @see replaceName()
      * 
      */
-    public function quoteName($spec)
+    public function quoteName($name)
     {
         // remove extraneous spaces
-        $spec = trim($spec);
+        $name = trim($name);
 
         // `original` AS `alias` ... note the 'rr' in strripos
-        $pos = strripos($spec, ' AS ');
+        $pos = strripos($name, ' AS ');
         if ($pos) {
             // recurse to allow for "table.col"
-            $orig  = $this->quoteName(substr($spec, 0, $pos));
+            $orig  = $this->quoteName(substr($name, 0, $pos));
             // use as-is
-            $alias = $this->replaceName(substr($spec, $pos + 4));
+            $alias = $this->replaceName(substr($name, $pos + 4));
             // done
             return "$orig AS $alias";
         }
 
         // `original` `alias`
-        $pos = strrpos($spec, ' ');
+        $pos = strrpos($name, ' ');
         if ($pos) {
             // recurse to allow for "table.col"
-            $orig = $this->quoteName(substr($spec, 0, $pos));
+            $orig = $this->quoteName(substr($name, 0, $pos));
             // use as-is
-            $alias = $this->replaceName(substr($spec, $pos + 1));
+            $alias = $this->replaceName(substr($name, $pos + 1));
             // done
             return "$orig $alias";
         }
 
         // `table`.`column`
-        $pos = strrpos($spec, '.');
+        $pos = strrpos($name, '.');
         if ($pos) {
             // use both as-is
-            $table = $this->replaceName(substr($spec, 0, $pos));
-            $col   = $this->replaceName(substr($spec, $pos + 1));
+            $table = $this->replaceName(substr($name, 0, $pos));
+            $col   = $this->replaceName(substr($name, $pos + 1));
             return "$table.$col";
         }
 
         // `name`
-        return $this->replaceName($spec);
+        return $this->replaceName($name);
     }
 
     /**
