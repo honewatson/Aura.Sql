@@ -2,6 +2,7 @@
 namespace Aura\Sql\Pdo;
 
 use PDO;
+use PDOStatement;
 
 /**
  * 
@@ -47,6 +48,10 @@ class ExtendedPdo extends PDO implements ExtendedPdoInterface
     
     protected $connected = false;
     
+    protected $profiler;
+    
+    protected $profile_info;
+    
     /**
      * 
      * Constructor; retains connection information but does not make a
@@ -72,7 +77,7 @@ class ExtendedPdo extends PDO implements ExtendedPdoInterface
         $username = null,
         $password = null,
         array $options = null,
-        array $attributes = []
+        array $attributes = null
     ) {
         $this->dsn      = $dsn;
         $this->username = $username;
@@ -81,9 +86,46 @@ class ExtendedPdo extends PDO implements ExtendedPdoInterface
         
         // can't use array_merge, as it will renumber keys
         $this->attributes = [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION];
-        foreach ($attributes as $attribute => $value) {
+        foreach ((array) $attributes as $attribute => $value) {
             $this->attributes[$attribute] = $value;
         }
+    }
+    
+    protected function beginProfile($function)
+    {
+        // if there's no profiler, can't profile
+        if (! $this->profiler) {
+            return;
+        }
+        
+        // if a profile has already started, don't start another one
+        if ($this->profile_info) {
+            return;
+        }
+        
+        // retain starting profile info
+        $this->profile_info['time'] = microtime(true);
+        $this->profile_info['function'] = $function;
+        $this->profile_info['bind_values'] = $this->bind_values;
+    }
+    
+    protected function endProfile(PDOStatement $sth = null)
+    {
+        // if there's no profiler, can't profile
+        if (! $this->profiler) {
+            return;
+        }
+        
+        // add an entry to the profiler
+        $this->profiler->addProfile(
+            microtime(true) - $this->profile_info['time'],
+            $this->profile_info['function'],
+            $sth ? $sth->queryString : null,
+            $this->profile_info['bind_values']
+        );
+        
+        // clear the starting profile info
+        $this->profile_info = [];
     }
     
     /**
@@ -99,7 +141,10 @@ class ExtendedPdo extends PDO implements ExtendedPdoInterface
     public function beginTransaction()
     {
         $this->connect();
-        return parent::beginTransaction();
+        $this->beginProfile(__FUNCTION__);
+        $result = parent::beginTransaction();
+        $this->endProfile();
+        return $result;
     }
     
     /**
@@ -132,7 +177,10 @@ class ExtendedPdo extends PDO implements ExtendedPdoInterface
     public function commit()
     {
         $this->connect();
-        return parent::commit();
+        $this->beginProfile(__FUNCTION__);
+        $result = parent::commit();
+        $this->endProfile();
+        return $result;
     }
     
     /**
@@ -152,12 +200,14 @@ class ExtendedPdo extends PDO implements ExtendedPdoInterface
         }
         
         // connect to the database
+        $this->beginProfile(__FUNCTION__);
         parent::__construct(
             $this->dsn,
             $this->username,
             $this->password,
             $this->options
         );
+        $this->endProfile();
         
         // remember that we have connected
         $this->connected = true;
@@ -183,7 +233,12 @@ class ExtendedPdo extends PDO implements ExtendedPdoInterface
     public function exec($statement)
     {
         $sth = $this->prepare($statement);
+        
+        $this->beginProfile(__FUNCTION__);
         $sth->execute();
+        $this->endProfile($sth);
+        
+        $this->bind_values = [];
         return $sth->rowCount();
     }
     
@@ -199,7 +254,10 @@ class ExtendedPdo extends PDO implements ExtendedPdoInterface
     public function inTransaction()
     {
         $this->connect();
-        return parent::inTransaction();
+        $this->beginProfile(__FUNCTION__);
+        $result = parent::inTransaction();
+        $this->endProfile();
+        return $result;
     }
     
     /**
@@ -217,7 +275,10 @@ class ExtendedPdo extends PDO implements ExtendedPdoInterface
     public function lastInsertId($name = null)
     {
         $this->connect();
-        return parent::lastInsertId($name);
+        $this->beginProfile(__FUNCTION__);
+        $result = parent::lastInsertId($name);
+        $this->endProfile();
+        return $result;
     }
     
     /**
@@ -351,7 +412,12 @@ class ExtendedPdo extends PDO implements ExtendedPdoInterface
     {
         return $this->bind_values;
     }
-
+    
+    public function getProfiler()
+    {
+        return $this->profiler;
+    }
+    
     /**
      * 
      * Connects to the database and prepares an SQL statement to be executed,
@@ -443,7 +509,6 @@ class ExtendedPdo extends PDO implements ExtendedPdoInterface
         }
 
         // clear out bind values, and done!
-        $this->bind_values = [];
         return $sth;
     }
     
@@ -475,7 +540,9 @@ class ExtendedPdo extends PDO implements ExtendedPdoInterface
     ) {
         // prepare and execute
         $sth = $this->prepare($statement);
+        $this->beginProfile(__FUNCTION__);
         $sth->execute();
+        $this->endProfile($sth);
         
         // allow for optional fetch mode
         if ($fetch_arg2 !== null) {
@@ -487,6 +554,7 @@ class ExtendedPdo extends PDO implements ExtendedPdoInterface
         }
         
         // done
+        $this->bind_values = [];
         return $sth;
     }
     
@@ -536,6 +604,13 @@ class ExtendedPdo extends PDO implements ExtendedPdoInterface
     public function rollBack()
     {
         $this->connect();
-        return parent::rollBack();
+        $this->beginProfile(__FUNCTION__);
+        $result = parent::rollBack();
+        $this->endProfile();
+    }
+
+    public function setProfiler(ProfilerInterface $profiler)
+    {
+        $this->profiler = $profiler;
     }
 }

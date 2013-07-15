@@ -5,7 +5,7 @@ use PDO;
 
 interface ExtendedPdoInterface
 {
-    // PDO methods
+    // parent PDO methods
     public function beginTransaction();
     public function commit();
     public function errorCode();
@@ -21,7 +21,7 @@ interface ExtendedPdoInterface
     public function rollBack();
     public function setAttribute($attribute, $value);
 
-    // Extended methods
+    // extended methods
     public function bindValues(array $values);
     public function connect();
     public function fetchAll($statement, array $bind_values = []);
@@ -31,4 +31,6 @@ interface ExtendedPdoInterface
     public function fetchPairs($statement, array $bind_values = []);
     public function fetchOne($statement, array $bind_values = []);
     public function getBindValues();
+    public function getProfiler();
+    public function setProfiler(ProfilerInterface $profiler);
 }
