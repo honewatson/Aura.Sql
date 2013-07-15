@@ -128,7 +128,7 @@ $pdo = new ExtendedPdo(...);
 $pdo->bindValues([ 'foo' => 'foo_value', 'bar' => 'bar_value']);
 $sth = $pdo->query('SELECT * FROM test WHERE foo = :foo AND bar = :bar');
 ?>
-
+```
 
 Array Quoting
 -------------
