@@ -282,7 +282,7 @@ set, you can activate and deactivate it as you wish using the
 `Profiler::setActive()` method. When not active, query profiles will not be
 retained.
 
-```
+```php
 <?php
 $pdo = new ExtendedPdo(...);
 $pdo->setProfiler(new Profiler);
