@@ -62,11 +62,11 @@ class ConnectionLocator implements ConnectionLocatorInterface
         array $write = []
     ) {
         $this->setDefault($default);
-        foreach ($read as $name => $spec) {
-            $this->setRead($name, $spec);
+        foreach ($read as $name => $callable) {
+            $this->setRead($name, $callable);
         }
-        foreach ($write as $name => $spec) {
-            $this->setWrite($name, $spec);
+        foreach ($write as $name => $callable) {
+            $this->setWrite($name, $callable);
         }
     }
 
@@ -74,14 +74,14 @@ class ConnectionLocator implements ConnectionLocatorInterface
      * 
      * Sets the default connection registry entry.
      * 
-     * @param callable $spec The registry entry.
+     * @param callable $callable The registry entry.
      * 
      * @return void
      * 
      */
-    public function setDefault($spec)
+    public function setDefault($callable)
     {
-        $this->registry['default'] = $spec;
+        $this->registry['default'] = $callable;
         $this->converted['default'] = false;
     }
 
@@ -95,8 +95,8 @@ class ConnectionLocator implements ConnectionLocatorInterface
     public function getDefault()
     {
         if (! $this->converted['default']) {
-            $func = $this->registry['default'];
-            $this->registry['default'] = $func();
+            $callable = $this->registry['default'];
+            $this->registry['default'] = $callable();
             $this->converted['default'] = true;
         }
         
@@ -109,14 +109,14 @@ class ConnectionLocator implements ConnectionLocatorInterface
      * 
      * @param string $name The name of the registry entry.
      * 
-     * @param callable $spec The registry entry.
+     * @param callable $callable The registry entry.
      * 
      * @return void
      * 
      */
-    public function setRead($name, $spec)
+    public function setRead($name, $callable)
     {
-        $this->registry['read'][$name] = $spec;
+        $this->registry['read'][$name] = $callable;
         $this->converted['read'][$name] = false;
     }
 
@@ -142,14 +142,14 @@ class ConnectionLocator implements ConnectionLocatorInterface
      * 
      * @param string $name The name of the registry entry.
      * 
-     * @param callable $spec The registry entry.
+     * @param callable $callable The registry entry.
      * 
      * @return void
      * 
      */
-    public function setWrite($name, $spec)
+    public function setWrite($name, $callable)
     {
-        $this->registry['write'][$name] = $spec;
+        $this->registry['write'][$name] = $callable;
         $this->converted['write'][$name] = false;
     }
 
@@ -195,8 +195,8 @@ class ConnectionLocator implements ConnectionLocatorInterface
         }
         
         if (! $this->converted[$type][$name]) {
-            $func = $this->registry[$type][$name];
-            $this->registry[$type][$name] = $func();
+            $callable = $this->registry[$type][$name];
+            $this->registry[$type][$name] = $callable();
             $this->converted[$type][$name] = true;
         }
         
