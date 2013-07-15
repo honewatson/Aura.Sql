@@ -50,6 +50,12 @@ class GatewayTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($this->connections, $actual);
     }
 
+    public function testGetQueryFactory()
+    {
+        $actual = $this->gateway->getQueryFactory();
+        $this->assertSame($this->query_factory, $actual);
+    }
+
     public function testGetMapper()
     {
         $actual = $this->gateway->getMapper();
