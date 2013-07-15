@@ -18,6 +18,6 @@ interface ConnectionInterface extends ExtendedPdoInterface
     public function getLastInsertIdName($table = null, $col =  null);
     public function limit(&$text, $count, $offset = 0);
     public function quoteValuesIn($text, $bind);
-    public function quoteName($spec);
+    public function quoteName($name);
     public function quoteNamesIn($text);
 }
