@@ -90,10 +90,10 @@ abstract class AbstractDbSetup
             'Gertrude', 'Hanna', 'Ione', 'Julia', 'Kara',
         ];
         
-        $statement = "INSERT INTO {$this->table} (name) VALUES (:name)";
+        $stm = "INSERT INTO {$this->table} (name) VALUES (:name)";
         foreach ($names as $name) {
             $this->connection->bindValues(['name' => $name]);
-            $this->connection->exec($statement);
+            $this->connection->exec($stm);
         }
     }
 }

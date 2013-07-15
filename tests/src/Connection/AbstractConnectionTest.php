@@ -59,10 +59,10 @@ abstract class AbstractConnectionTest extends \PHPUnit_Framework_TestCase
     
     public function testQuery()
     {
-        $text = "SELECT * FROM {$this->table}";
-        $stmt = $this->connection->query($text);
-        $this->assertInstanceOf('PDOStatement', $stmt);
-        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $stm = "SELECT * FROM {$this->table}";
+        $sth = $this->connection->query($stm);
+        $this->assertInstanceOf('PDOStatement', $sth);
+        $result = $sth->fetchAll(PDO::FETCH_ASSOC);
         $expect = 10;
         $actual = count($result);
         $this->assertEquals($expect, $actual);
@@ -70,12 +70,12 @@ abstract class AbstractConnectionTest extends \PHPUnit_Framework_TestCase
     
     public function testQueryWithData()
     {
-        $text = "SELECT * FROM {$this->table} WHERE id <= :val";
+        $stm = "SELECT * FROM {$this->table} WHERE id <= :val";
         $bind['val'] = '5';
         $this->connection->bindValues($bind);
-        $stmt = $this->connection->query($text);
-        $this->assertInstanceOf('PDOStatement', $stmt);
-        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $sth = $this->connection->query($stm);
+        $this->assertInstanceOf('PDOStatement', $sth);
+        $result = $sth->fetchAll(PDO::FETCH_ASSOC);
         $expect = 5;
         $actual = count($result);
         $this->assertEquals($expect, $actual);
@@ -83,15 +83,15 @@ abstract class AbstractConnectionTest extends \PHPUnit_Framework_TestCase
     
     public function testQueryWithArrayData()
     {
-        $text = "SELECT * FROM {$this->table} WHERE id IN (:list) OR id = :id";
+        $stm = "SELECT * FROM {$this->table} WHERE id IN (:list) OR id = :id";
         
         $bind['list'] = [1, 2, 3, 4];
         $bind['id'] = 5;
         
         $this->connection->bindValues($bind);
-        $stmt = $this->connection->query($text);
-        $this->assertInstanceOf('PDOStatement', $stmt);
-        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $sth = $this->connection->query($stm);
+        $this->assertInstanceOf('PDOStatement', $sth);
+        $result = $sth->fetchAll(PDO::FETCH_ASSOC);
         $expect = 5;
         $actual = count($result);
         $this->assertEquals($expect, $actual);
@@ -99,7 +99,7 @@ abstract class AbstractConnectionTest extends \PHPUnit_Framework_TestCase
     
     public function testPrepareWithQuotedStringsAndData()
     {
-        $text = "SELECT * FROM {$this->table}
+        $stm = "SELECT * FROM {$this->table}
                  WHERE 'leave :foo alone'
                  AND id IN (:list)
                  AND \"leave :bar alone\"";
@@ -111,17 +111,17 @@ abstract class AbstractConnectionTest extends \PHPUnit_Framework_TestCase
         ];
         
         $this->connection->bindValues($bind);
-        $stmt = $this->connection->prepare($text);
+        $sth = $this->connection->prepare($stm);
         
-        $expect = str_replace(':list', "'1', '2', '3', '4', '5'", $text);
-        $actual = $stmt->queryString;
+        $expect = str_replace(':list', "'1', '2', '3', '4', '5'", $stm);
+        $actual = $sth->queryString;
         $this->assertSame($expect, $actual);
     }
     
     public function testFetchAll()
     {
-        $text = "SELECT * FROM {$this->table}";
-        $result = $this->connection->fetchAll($text);
+        $stm = "SELECT * FROM {$this->table}";
+        $result = $this->connection->fetchAll($stm);
         $expect = 10;
         $actual = count($result);
         $this->assertEquals($expect, $actual);
@@ -129,8 +129,8 @@ abstract class AbstractConnectionTest extends \PHPUnit_Framework_TestCase
     
     public function testFetchAssoc()
     {
-        $text = "SELECT * FROM {$this->table} ORDER BY id";
-        $result = $this->connection->fetchAssoc($text);
+        $stm = "SELECT * FROM {$this->table} ORDER BY id";
+        $result = $this->connection->fetchAssoc($stm);
         $expect = 10;
         $actual = count($result);
         $this->assertEquals($expect, $actual);
@@ -143,8 +143,8 @@ abstract class AbstractConnectionTest extends \PHPUnit_Framework_TestCase
     
     public function testFetchCol()
     {
-        $text = "SELECT id FROM {$this->table} ORDER BY id";
-        $result = $this->connection->fetchCol($text);
+        $stm = "SELECT id FROM {$this->table} ORDER BY id";
+        $result = $this->connection->fetchCol($stm);
         $expect = 10;
         $actual = count($result);
         $this->assertEquals($expect, $actual);
@@ -156,16 +156,16 @@ abstract class AbstractConnectionTest extends \PHPUnit_Framework_TestCase
     
     public function testFetchValue()
     {
-        $text = "SELECT id FROM {$this->table} WHERE id = 1";
-        $actual = $this->connection->fetchValue($text);
+        $stm = "SELECT id FROM {$this->table} WHERE id = 1";
+        $actual = $this->connection->fetchValue($stm);
         $expect = '1';
         $this->assertEquals($expect, $actual);
     }
     
     public function testFetchPairs()
     {
-        $text = "SELECT id, name FROM {$this->table} ORDER BY id";
-        $actual = $this->connection->fetchPairs($text);
+        $stm = "SELECT id, name FROM {$this->table} ORDER BY id";
+        $actual = $this->connection->fetchPairs($stm);
         $expect = [
           1  => 'Anna',
           2  => 'Betty',
@@ -183,8 +183,8 @@ abstract class AbstractConnectionTest extends \PHPUnit_Framework_TestCase
     
     public function testFetchOne()
     {
-        $text = "SELECT id, name FROM {$this->table} WHERE id = 1";
-        $actual = $this->connection->fetchOne($text);
+        $stm = "SELECT id, name FROM {$this->table} WHERE id = 1";
+        $actual = $this->connection->fetchOne($stm);
         $expect = [
             'id'   => '1',
             'name' => 'Anna',
@@ -260,9 +260,9 @@ abstract class AbstractConnectionTest extends \PHPUnit_Framework_TestCase
     
     public function testLastInsertId()
     {
-        $statement = "INSERT INTO {$this->table} (name) VALUES (:name)";
+        $stm = "INSERT INTO {$this->table} (name) VALUES (:name)";
         $this->connection->bindValues(['name' => 'Lora']);
-        $this->connection->exec($statement);
+        $this->connection->exec($stm);
         
         // did we get the right last ID?
         $actual = $this->connection->lastInsertId($this->table, 'id');
