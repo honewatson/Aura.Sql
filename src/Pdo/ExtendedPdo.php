@@ -44,7 +44,10 @@ class ExtendedPdo extends PDO implements ExtendedPdoInterface
     
     protected $options = [];
     
-    protected $attributes = [];
+    protected $attributes = [
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_EMULATE_PREPARES => true,
+    ];
     
     protected $connected = false;
     
@@ -85,7 +88,6 @@ class ExtendedPdo extends PDO implements ExtendedPdoInterface
         $this->options  = $options;
         
         // can't use array_merge, as it will renumber keys
-        $this->attributes = [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION];
         foreach ((array) $attributes as $attribute => $value) {
             $this->attributes[$attribute] = $value;
         }
@@ -95,11 +97,6 @@ class ExtendedPdo extends PDO implements ExtendedPdoInterface
     {
         // if there's no profiler, can't profile
         if (! $this->profiler) {
-            return;
-        }
-        
-        // if a profile has already started, don't start another one
-        if ($this->profile_info) {
             return;
         }
         
@@ -260,6 +257,11 @@ class ExtendedPdo extends PDO implements ExtendedPdoInterface
         return $result;
     }
     
+    public function isConnected()
+    {
+        return $this->connected;
+    }
+    
     /**
      * 
      * Returns the last inserted autoincrement sequence value.
@@ -279,6 +281,18 @@ class ExtendedPdo extends PDO implements ExtendedPdoInterface
         $result = parent::lastInsertId($name);
         $this->endProfile();
         return $result;
+    }
+    
+    public function errorCode()
+    {
+        $this->connect();
+        return parent::errorCode();
+    }
+    
+    public function errorInfo()
+    {
+        $this->connect();
+        return parent::errorInfo();
     }
     
     /**
@@ -401,6 +415,12 @@ class ExtendedPdo extends PDO implements ExtendedPdoInterface
         return $sth->fetchColumn(0);
     }
 
+    public function getAttribute($attribute)
+    {
+        $this->connect();
+        return parent::getAttribute($attribute);
+    }
+    
     /**
      * 
      * Returns the array of values to bind to the next query.
@@ -609,6 +629,15 @@ class ExtendedPdo extends PDO implements ExtendedPdoInterface
         $this->endProfile();
     }
 
+    public function setAttribute($attribute, $value)
+    {
+        if ($this->connected) {
+            return parent::setAttribute($attribute, $value);
+        } else {
+            $this->attributes[$attribute] = $value;
+        }
+    }
+    
     public function setProfiler(ProfilerInterface $profiler)
     {
         $this->profiler = $profiler;

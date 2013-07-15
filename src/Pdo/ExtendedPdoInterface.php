@@ -30,6 +30,7 @@ interface ExtendedPdoInterface
     public function fetchAssoc($statement, array $bind_values = []);
     public function fetchPairs($statement, array $bind_values = []);
     public function fetchOne($statement, array $bind_values = []);
+    public function isConnected();
     public function getBindValues();
     public function getProfiler();
     public function setProfiler(ProfilerInterface $profiler);
