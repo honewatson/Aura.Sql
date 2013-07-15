@@ -1,8 +1,10 @@
 <?php
-namespace Aura\Sql\DbSetup;
+namespace Aura\Sql\Setup;
 
-class Pgsql extends AbstractDbSetup
+class PgsqlSetup extends AbstractSetup
 {
+    protected $type = 'Pgsql';
+    
     protected $create_table = "CREATE TABLE aura_test_table (
          id                     SERIAL PRIMARY KEY
         ,name                   VARCHAR(50) NOT NULL

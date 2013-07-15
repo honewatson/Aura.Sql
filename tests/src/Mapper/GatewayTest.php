@@ -3,8 +3,9 @@ namespace Aura\Sql\Mapper;
 
 use Aura\Sql\Assertions;
 use Aura\Sql\Connection\ConnectionLocator;
-use Aura\Sql\DbSetup;
+use Aura\Sql\Setup;
 use Aura\Sql\Query\QueryFactory;
+use Aura\Sql\Setup\SqliteSetup;
 
 class GatewayTest extends \PHPUnit_Framework_TestCase
 {
@@ -19,10 +20,10 @@ class GatewayTest extends \PHPUnit_Framework_TestCase
     protected function setUp()
     {
         parent::setUp();
-        $db_setup = new DbSetup\Sqlite;
+        $setup = new SqliteSetup;
         
         $this->connections = new ConnectionLocator(
-            function () use ($db_setup) { return $db_setup->getConnection(); },
+            function () use ($setup) { return $setup->getConnection(); },
             [],
             []
         );

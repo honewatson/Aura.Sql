@@ -35,13 +35,13 @@ abstract class AbstractSchemaTest extends \PHPUnit_Framework_TestCase
         }
         
         // database setup
-        $db_setup_class = 'Aura\Sql\DbSetup\\' . ucfirst($this->connection_type);
-        $this->db_setup = new $db_setup_class;
+        $setup_class = 'Aura\Sql\Setup\\' . ucfirst($this->connection_type) . 'Setup';
+        $this->setup = new $setup_class;
         
         // schema class same as this class, minus "Test"
         $class = substr(get_class($this), 0, -4);
         $this->schema = new $class(
-            $this->db_setup->getConnection(),
+            $this->setup->getConnection(),
             new ColumnFactory
         );
     }
@@ -60,14 +60,14 @@ abstract class AbstractSchemaTest extends \PHPUnit_Framework_TestCase
     
     public function testFetchTableList_schema()
     {
-        $schema2 = $this->db_setup->getSchema2();
+        $schema2 = $this->setup->getSchema2();
         $actual = $this->schema->fetchTableList($schema2);
         $this->assertEquals($this->expect_fetch_table_list_schema, $actual);
     }
     
     public function testFetchTableCols()
     {
-        $table  = $this->db_setup->getTable();
+        $table  = $this->setup->getTable();
         $actual = $this->schema->fetchTableCols($table);
         $expect = $this->expect_fetch_table_cols;
         ksort($actual);
@@ -80,8 +80,8 @@ abstract class AbstractSchemaTest extends \PHPUnit_Framework_TestCase
     
     public function testFetchTableCols_schema()
     {
-        $table  = $this->db_setup->getTable();
-        $schema2 = $this->db_setup->getSchema2();
+        $table  = $this->setup->getTable();
+        $schema2 = $this->setup->getSchema2();
         $actual = $this->schema->fetchTableCols("{$schema2}.{$table}");
         $expect = $this->expect_fetch_table_cols;
         ksort($actual);

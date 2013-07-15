@@ -1,11 +1,13 @@
 <?php
-namespace Aura\Sql\DbSetup;
+namespace Aura\Sql\Setup;
 
 use Aura\Sql\Profiler;
 use Aura\Sql\Query\QueryFactory;
 
-abstract class AbstractDbSetup
+abstract class AbstractSetup
 {
+    protected $type;
+    
     protected $extension;
     
     protected $connection;
@@ -20,11 +22,10 @@ abstract class AbstractDbSetup
     
     public function __construct()
     {
-        $type = strrchr(get_class($this), '\\');
-        $setup_class = 'Aura\Sql\DbSetup' . $type;
+        $setup_class = "Aura\Sql\Setup\\{$this->type}Setup";
         $connection_params = $GLOBALS[$setup_class]['connection_params'];
         
-        $connection_class = 'Aura\Sql\Connection' . $type . 'Connection';
+        $connection_class = "Aura\Sql\Connection\\{$this->type}Connection";
         $this->connection = new $connection_class(
             $connection_params['dsn'],
             $connection_params['username'],

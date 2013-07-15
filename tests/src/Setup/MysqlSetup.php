@@ -1,8 +1,10 @@
 <?php
-namespace Aura\Sql\DbSetup;
+namespace Aura\Sql\Setup;
 
-class Mysql extends AbstractDbSetup
+class MysqlSetup extends AbstractSetup
 {
+    protected $type = 'Mysql';
+    
     protected $create_table = "CREATE TABLE aura_test_table (
          id                     INTEGER AUTO_INCREMENT PRIMARY KEY
         ,name                   VARCHAR(50) NOT NULL

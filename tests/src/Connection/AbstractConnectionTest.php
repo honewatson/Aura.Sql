@@ -46,15 +46,15 @@ abstract class AbstractConnectionTest extends \PHPUnit_Framework_TestCase
         }
         
         // database setup
-        $db_setup_class = substr(get_class($this), 0, -4);
-        $db_setup_class = str_replace('Connection', 'DbSetup', $db_setup_class);
-        $this->db_setup = new $db_setup_class;
+        $setup_class = substr(get_class($this), 0, -4);
+        $setup_class = str_replace('Connection', 'Setup', $setup_class) . 'Setup';
+        $this->setup = new $setup_class;
         
         // the connection
-        $this->connection = $this->db_setup->getConnection();
+        $this->connection = $this->setup->getConnection();
         
         // the table
-        $this->table = $this->db_setup->getTable();
+        $this->table = $this->setup->getTable();
     }
     
     public function testQuery()

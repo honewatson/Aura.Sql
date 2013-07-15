@@ -2,7 +2,7 @@
 /**
  * Mysql
  */
-$GLOBALS['Aura\Sql\DbSetup\Mysql']['connection_params'] = [
+$GLOBALS['Aura\Sql\Setup\MysqlSetup']['connection_params'] = [
     'mysql:host=127.0.0.1',
     'username' => 'root',
     'password' => '',
@@ -13,7 +13,7 @@ $GLOBALS['Aura\Sql\DbSetup\Mysql']['connection_params'] = [
 /**
  * Pgsql
  */
-$GLOBALS['Aura\Sql\DbSetup\Pgsql']['connection_params'] = [
+$GLOBALS['Aura\Sql\Setup\PgsqlSetup']['connection_params'] = [
     'pgsql:host=127.0.0.1;dbname=test',
     'username' => 'postgres',
     'password' => '',
@@ -24,7 +24,7 @@ $GLOBALS['Aura\Sql\DbSetup\Pgsql']['connection_params'] = [
 /**
  * Sqlite
  */
-$GLOBALS['Aura\Sql\DbSetup\Sqlite']['connection_params'] = [
+$GLOBALS['Aura\Sql\Setup\SqliteSetup']['connection_params'] = [
     'dsn' => 'sqlite::memory:',
     'username' => null,
     'password' => null,
