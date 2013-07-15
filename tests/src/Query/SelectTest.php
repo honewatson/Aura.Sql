@@ -1,6 +1,8 @@
 <?php
 namespace Aura\Sql\Query;
 
+use Aura\Sql\Connection\SqliteConnection;
+
 class SelectTest extends AbstractQueryTest
 {
     protected $query_type = 'select';
@@ -316,5 +318,98 @@ class SelectTest extends AbstractQueryTest
         
         $actual = $this->query->__toString();
         $this->assertSameSql($expect, $actual);
+    }
+    
+    public function testQuery()
+    {
+        $this->query->cols(['1, 2, 3, 4, 5']);
+        $sth = $this->query->query();
+        $this->assertInstanceOf('PDOStatement', $sth);
+    }
+    
+    public function testFetchAll()
+    {
+        $this->query->cols(['1, 2, 3, 4, 5']);
+        $actual = $this->query->fetchAll();
+        $expect = [
+            0 => [
+                1 => '1',
+                2 => '2',
+                3 => '3',
+                4 => '4',
+                5 => '5',
+            ]
+        ];
+        $this->assertSame($expect, $actual);
+    }
+    
+    public function testFetchAssoc()
+    {
+        $this->query->cols(['1, 2, 3']);
+        $this->query->union();
+        $this->query->cols(['4, 5, 6']);
+        $this->query->union();
+        $this->query->cols(['7, 8, 9']);
+        $actual = $this->query->fetchAssoc();
+        $expect = array (
+          1 => array (
+            1 => '1',
+            2 => '2',
+            3 => '3',
+          ),
+          4 => array (
+            1 => '4',
+            2 => '5',
+            3 => '6',
+          ),
+          7 => array (
+            1 => '7',
+            2 => '8',
+            3 => '9',
+          ),
+        );
+        $this->assertSame($expect, $actual);
+    }
+    
+    public function testFetchCol()
+    {
+        $this->query->cols(['1, 2']);
+        $this->query->union();
+        $this->query->cols(['3, 4']);
+        $this->query->union();
+        $this->query->cols(['5, 6']);
+        
+        $actual = $this->query->fetchCol();
+        $expect = ['1', '3', '5'];
+        $this->assertSame($expect, $actual);
+    }
+    
+    public function testFetchOne()
+    {
+        $this->query->cols(['1, 2, 3, 4, 5']);
+        $actual = $this->query->fetchOne();
+        $expect = ['1' => '1', '2' => '2', '3' => '3', '4' => '4', '5' => '5'];
+        $this->assertSame($expect, $actual);
+    }
+    
+    public function testFetchPairs()
+    {
+        $this->query->cols(['1, 2']);
+        $this->query->union();
+        $this->query->cols(['3, 4']);
+        $this->query->union();
+        $this->query->cols(['5, 6']);
+        
+        $actual = $this->query->fetchPairs();
+        $expect = ['1' => '2', '3' => '4', '5' => '6'];
+        $this->assertSame($expect, $actual);
+    }
+    
+    public function testFetchValue()
+    {
+        $this->query->cols(['1, 2, 3, 4, 5']);
+        $actual = $this->query->fetchValue();
+        $expect = '1';
+        $this->assertSame($expect, $actual);
     }
 }
