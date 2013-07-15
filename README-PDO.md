@@ -188,6 +188,9 @@ echo $sth->queryString;
 ?>
 ```
 
+Finally, note that array quoting works only on the `ExtendedPdo` instance, not
+on returned PDOStatement instances.
+
 
 Fetch Methods
 -------------
