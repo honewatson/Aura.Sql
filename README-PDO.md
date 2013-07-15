@@ -1,16 +1,11 @@
 Aura.Sql.Pdo
 ============
 
-The` Aura.Sql.Pdo` package is extracted from `Aura.Sql`, and provides *only*
-the `ExtendedPdo` functionality from that package. This is for developers who
-want the lightest possible lower-level convenience of `ExtendedPdo` but not
-the driver-specific `Connection` and `Schema` classes, the `Query` classes, or
-the `Mapper` functionality.
+This library provides an `ExtendedPdo` class that is an extension of the
+PHP-native `PDO` class (read more about `PDO` [here](http://php.net/PDO).) Among
+other things, this means that code already using `PDO` or typehinted to `PDO` can
+use `ExtendedPdo` with no changes to existing code.
 
-The `ExtendedPdo` class is an extension of the PHP-native `PDO` class (read
-more about PDO [here](http://php.net/PDO).) Among other things, this means
-that code already using PDO or typehinted to PDO can use `ExtendedPdo` with no
-changes to existing code.
 
 Added functionality in `ExtendedPdo` includes:
 
@@ -41,28 +36,20 @@ Added functionality in `ExtendedPdo` includes:
 - **Exceptions by default.** `ExendedPdo` starts in the `ERRMODE_EXCEPTION`
   mode for error reporting instead of `ERRMODE_SILENT`.
 
+This library is compliant with [PSR-0][], [PSR-1][], and [PSR-2][]. If you
+notice compliance oversights, please send a patch via pull request.
 
-Autoloading
------------
-
-`ExtendedPdo` comes with an autoloader; to add it to the SPL autoload stack,
-require or include the `autoload.php` file.
-
-```php
-<?php
-require '/path/to/Aura.Sql.Pdo/autoload.php';
-?>
-```
-
-You can then instantiate `ExtendedPdo`.
+[PSR-0]: https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-0.md
+[PSR-1]: https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-1-basic-coding-standard.md
+[PSR-2]: https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-2-coding-style-guide.md
 
 
 Instantiation
 -------------
 
-Instantiation is the same as with PDO: pass a data source name, username,
+Instantiation is the same as with `PDO`: pass a data source name, username,
 password, and driver options.  There is one additional parameter that
-allows you to pass PDO attributes to be set after the connection is made.
+allows you to pass `PDO` attributes to be set after the connection is made.
 
 ```php
 <?php
@@ -82,7 +69,7 @@ $pdo = new ExtendedPdo(
 Lazy Connection
 ---------------
 
-Whereas PDO connects on instantiation, `ExtendedPdo` does not connect
+Whereas `PDO` connects on instantiation, `ExtendedPdo` does not connect
 immediately. Instead, it connects only when you call a method that actually
 needs the connection to the database; e.g., on `query()`.
 
@@ -110,7 +97,7 @@ $pdo->connect();
 Bind Values
 -----------
 
-Instead of having to bind values to a prepared PDOStatement, you can call
+Instead of having to bind values to a prepared `PDOStatement`, you can call
 `bindValues()` directly on the `ExtendedPdo` instance, and those values will
 be bound to named placeholders in the next query.
 
@@ -189,7 +176,7 @@ echo $sth->queryString;
 ```
 
 Finally, note that array quoting works only on the `ExtendedPdo` instance, not
-on returned PDOStatement instances.
+on returned `PDOStatement` instances.
 
 
 Fetch Methods
@@ -197,7 +184,7 @@ Fetch Methods
 
 `ExtendedPdo` comes with `fetch*()` methods to reduce boilerplate code. Instead
 of issuing prepare(), a series of bindValue() calls, execute(), and then fetch*()
-on a PDOStatement, you can bind values and fetch results in one call.
+on a `PDOStatement`, you can bind values and fetch results in one call.
 
 ```php
 <?php

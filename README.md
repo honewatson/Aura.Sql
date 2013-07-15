@@ -19,8 +19,26 @@ notice compliance oversights, please send a patch via pull request.
 [PSR-1]: https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-1-basic-coding-standard.md
 [PSR-2]: https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-2-coding-style-guide.md
 
-Unlike other Aura pacakges, the README instructions are separated into four
-separate documents:
+Autoloading
+-----------
+
+`Aura.Sql` comes with an autoloader; to add it to the SPL autoload stack,
+require or include the `autoload.php` file.
+
+```php
+<?php
+require '/path/to/Aura.Sql/autoload.php';
+?>
+```
+
+You can then instantiate any of the package classes.
+
+
+Documentation
+-------------
+
+Unlike other Aura packages, the README instructions are divided into separate
+documents.
 
 - [README-PDO.md][] for the extended PDO functionality;
 

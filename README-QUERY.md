@@ -1,8 +1,7 @@
 Aura.Sql.Query
 ==============
 
-TBD.
-
+This library provides 
 * * *
 
 Query Objects
