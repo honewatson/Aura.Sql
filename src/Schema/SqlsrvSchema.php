@@ -1,7 +1,7 @@
 <?php
 namespace Aura\Sql\Schema;
 
-class SqlsrvSchema
+class SqlsrvSchema extends AbstractSchema
 {
     /**
      * 
@@ -18,7 +18,7 @@ class SqlsrvSchema
     public function fetchTableList($schema = null)
     {
         $text = "SELECT name FROM sysobjects WHERE type = 'U' ORDER BY name";
-        return $this->fetchCol($text);
+        return $this->connection->fetchCol($text);
     }
 
     /**
@@ -36,16 +36,16 @@ class SqlsrvSchema
      */
     public function fetchTableCols($spec)
     {
-        list($schema, $table) = $this->splitIdent($spec);
+        list($schema, $table) = $this->splitName($spec);
 
         // get column info
-        $text = "exec sp_columns @table_name = " . $this->quoteName($table);
-        $raw_cols = $this->fetchAll($text);
+        $text = "exec sp_columns @table_name = " . $this->connection->quoteName($table);
+        $raw_cols = $this->connection->fetchAll($text);
 
         // get primary key info
         $text = "exec sp_pkeys @table_owner = " . $raw_cols[0]['TABLE_OWNER']
-              . ", @table_name = " . $this->quoteName($table);
-        $raw_keys = $this->fetchAll($text);
+              . ", @table_name = " . $this->connection->quoteName($table);
+        $raw_keys = $this->connection->fetchAll($text);
         $keys = [];
         foreach ($raw_keys as $row) {
             $keys[] = $row['COLUMN_NAME'];

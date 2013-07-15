@@ -1,7 +1,7 @@
 <?php
 namespace Aura\Sql\Connection;
 
-class MysqlTest extends AbstractConnectionTest
+class MysqlConnectionTest extends AbstractConnectionTest
 {
     protected $extension = 'pdo_mysql';
     

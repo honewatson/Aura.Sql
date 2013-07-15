@@ -47,7 +47,7 @@ abstract class AbstractConnectionTest extends \PHPUnit_Framework_TestCase
         
         // database setup
         $setup_class = substr(get_class($this), 0, -4);
-        $setup_class = str_replace('Connection', 'Setup', $setup_class) . 'Setup';
+        $setup_class = str_replace('Connection', 'Setup', $setup_class);
         $this->setup = new $setup_class;
         
         // the connection

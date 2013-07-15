@@ -1,9 +1,16 @@
-Aura SQL
+Aura.Sql
 ========
 
-The Aura SQL package provides connections to connect to and query against SQL
-data sources such as MySQL, PostgreSQL, and Sqlite. The connections are mostly
-wrappers around [PDO](http://php.net/PDO) connections.
+The Aura.Sql package provides libraries for connecting to and querying against
+SQL databases such as MySQL, PostgreSQL, and Sqlite. It includes Query Objects
+for select/insert/update/delete, a DataMapper implementation, and
+schema-discovery functionality.
+
+For the convenience of those who only want an extended version of PDO, the PDO
+portions of this package are available separately under the `Aura.Sql.Pdo`
+package. Note that there are no dependencies between the two packages; the
+`Aura.Sql.Pdo` package is merely an extracted copy of the PDO library
+contained in this package.
 
 This package is compliant with [PSR-0][], [PSR-1][], and [PSR-2][]. If you
 notice compliance oversights, please send a patch via pull request.

@@ -17,21 +17,8 @@ namespace Aura\Sql\Connection;
  * @package Aura.Sql
  * 
  */
-class Sqlsrv extends AbstractConnection
+class SqlsrvConnection extends AbstractConnection
 {
-    /**
-     * 
-     * The PDO DSN for the connection. This can be an array of key-value pairs
-     * or a string (minus the PDO type prefix).
-     * 
-     * @var string|array
-     * 
-     */
-    protected $dsn = [
-        'Server' => null,
-        'Database' => null,
-    ];
-
     /**
      * 
      * The PDO type prefix.

@@ -31,3 +31,14 @@ $GLOBALS['Aura\Sql\Setup\SqliteSetup']['connection_params'] = [
     'options'       => [],
     'attributes'    => [],
 ];
+
+/**
+ * Sqlsrv
+ */
+$GLOBALS['Aura\Sql\Setup\SqlsrvSetup']['connect_params'] = [
+    'dsn'           => 'sqlsrv:Server=localhost\\SQLEXPRESS;Database=test',
+    'username'      => null,
+    'password'      => null,
+    'options'       => [],
+    'attributes'    => [],
+];
