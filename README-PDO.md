@@ -114,7 +114,7 @@ Instead of having to bind values to a prepared PDOStatement, you can call
 `bindValues()` directly on the `ExtendedPdo` instance, and those values will
 be bound to named placeholders in the next query.
 
-```
+```php
 <?php
 // normal PDO way
 $pdo = new PDO(...);
@@ -138,6 +138,7 @@ difficult to bind an array to something like an `IN (...)` condition in SQL.
 However, `ExtendedPdo` recognizes arrays and converts them into
 comma-separated quoted strings.
 
+```php
 <?php
 // the array to be quoted
 $array = ['foo', 'bar', 'baz'];
@@ -230,7 +231,7 @@ $result = $pdo->fetchPairs($stm, $bind);
 // fetchValue() returns the value of the first row in the first column
 $result = $pdo->fetchValue($stm, $bind);
 ?>
-
+```
 
 Profiler
 --------
