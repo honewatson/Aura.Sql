@@ -153,6 +153,7 @@ $cond = 'IN (' . $pdo->quote($array) . ')';
 $pdo = new ExtendedPdo(...);
 $cond = 'IN (' . $pdo->quote($array) . ')'; 
 ?>
+```
 
 Whereas the normal `PDO::prepare()` does not deal with bound array values,
 `ExtendedPdo` modifies the query string to replace the named placeholder with
