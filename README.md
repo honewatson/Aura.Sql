@@ -22,15 +22,18 @@ notice compliance oversights, please send a patch via pull request.
 Unlike other Aura pacakges, the README instructions are separated into four
 separate documents:
 
-- README-PDO.md for the `ExtendedPdo` libarary;
+- [README-PDO.md][] for the extended PDO functionality;
 
-- README-CONNECTION.md for the driver-specific connection libraries;
+- [README-CONNECTION.md][] for the driver-specific connection libraries;
 
-- README-SCHEMA.md for the driver-specific schema discovery libraries;
+- [README-SCHEMA.md][] for the driver-specific schema discovery libraries;
 
-- README-QUERY.md for the object-oriented query system; and
+- [README-QUERY.md][] for the object-oriented query system; and
 
-- README-MAPPER.md for the DataMapper implementation.
+- [README-MAPPER.md][] for the DataMapper implementation.
 
-  
-
+[README-PDO.md]: README-PDO.md
+[README-CONNECTION.md]: README-CONNECTION.md
+[README-SCHEMA.md]: README-SCHEMA.md
+[README-QUERY.md]: README-QUERY.md
+[README-MAPPER.md]: README-MAPPER.md
