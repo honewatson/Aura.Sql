@@ -6,6 +6,7 @@ use Aura\Sql\Pdo\ExtendedPdo;
 use Aura\Sql\Profiler;
 use Aura\Sql\Query\QueryFactory;
 use Aura\Sql\Connection\SqliteConnection;
+use Aura\Sql\Connection\ConnectionLocator;
 
 abstract class AbstractQueryTest extends \PHPUnit_Framework_TestCase
 {
@@ -15,15 +16,22 @@ abstract class AbstractQueryTest extends \PHPUnit_Framework_TestCase
     
     protected $query;
 
-    protected $connection;
+    protected $connections;
+    
+    protected $query_factory;
     
     protected function setUp()
     {
         parent::setUp();
-        $this->connection = new SqliteConnection('sqlite::memory:');
-        $query_factory = new QueryFactory;
+        
+        $this->connections = new ConnectionLocator(
+            function () { return new SqliteConnection('sqlite::memory:'); }
+        );
+        
+        $this->query_factory = new QueryFactory($this->connections);
+        
         $method = 'new' . $this->query_type;
-        $this->query = $query_factory->$method($this->connection);
+        $this->query = $this->query_factory->$method();
     }
     
     protected function tearDown()
@@ -33,8 +41,9 @@ abstract class AbstractQueryTest extends \PHPUnit_Framework_TestCase
 
     public function testGetConnection()
     {
-        $connection = $this->query->getConnection();
-        $this->assertSame($this->connection, $connection);
+        $actual = $this->query->getConnection();
+        $expect = $this->connections->getDefault();
+        $this->assertSame($expect, $actual);
     }
     
     public function testSetAddGetBind()
