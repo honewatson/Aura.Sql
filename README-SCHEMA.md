@@ -1,22 +1,36 @@
 Aura.Sql.Schema
 ===============
 
-TBD.
+This library provides facilities to read table names and table columns from a
+database.
 
-* * *
 
-Retrieving Table Information
-----------------------------
+Instantiation
+-------------
+
+Instantiate a driver-specific schema object with a matching database
+connection:
+
+```php
+<?php
+use Aura\Sql\Connection\MysqlConnection;
+use Aura\Sql\Schema\MysqlSchema;
+
+$connection = new MysqlConnection;
+$schema = new MysqlSchema($connection);
+?>
+```
+
+
+Retrieving Schema Information
+-----------------------------
 
 To get a list of tables in the database, issue `fetchTableList()`:
 
 ```php
 <?php
-// get the list of tables
-$list = $connection->fetchTableList();
-
-// show them
-foreach ($list as $table) {
+$tables = $schema->fetchTableList();
+foreach ($tables as $table) {
     echo $table . PHP_EOL;
 }
 ?>
@@ -26,13 +40,7 @@ To get information about the columns in a table, issue `fetchTableCols()`:
 
 ```php
 <?php
-// the table to get cols for
-$table = 'foo';
-
-// get the cols
-$cols = $connection->fetchTableCols($table);
-
-// show them
+$cols = $schema->fetchTableCols('table_name');
 foreach ($cols as $name => $col) {
     echo "Column $name is of type "
        . $col->type
@@ -55,7 +63,9 @@ Each column description is a `Column` object with the following properties:
 
 - `notnull`: (bool) Is the column marked as `NOT NULL`?
 
-- `default`: (mixed) The default value for the column. Note that sometimes this will be `null` if the underlying database is going to set a timestamp automatically.
+- `default`: (mixed) The default value for the column. Note that sometimes
+  this will be `null` if the underlying database is going to set a timestamp
+  automatically.
 
 - `autoinc`: (bool) Is the column auto-incremented?
 

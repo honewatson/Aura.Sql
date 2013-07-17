@@ -7,10 +7,14 @@ generally via a `QueryFactory`.
 Instantiation
 -------------
 
-Instantiate a `QueryFactory` like so:
+Instantiate a `QueryFactory` like so (you will need a database connection
+later):
 
 ```php
 <?php
+use Aura\Sql\Query\QueryFactory;
+use Aura\Sql\Connection\MysqlConnection;
+
 $query_factory = new QueryFactory;
 ?>
 ```
