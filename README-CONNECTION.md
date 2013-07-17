@@ -1,7 +1,7 @@
 Aura.Sql.Connection
 ===================
 
-This libarary is part of [`Aura.Sql`](README.md).  It is an extra
+This library is part of [`Aura.Sql`](README.md).  It is an extra
 extension to `ExtendedPdo` to provide driver-specific functionality, such as
 quoting of identifier names, getting the last insert ID, and adding `LIMIT`
 clauses to `SELECT` statements.
