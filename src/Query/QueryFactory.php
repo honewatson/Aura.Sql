@@ -11,7 +11,6 @@
 namespace Aura\Sql\Query;
 
 use Aura\Sql\Connection\ConnectionInterface;
-use Aura\Sql\Connection\ConnectionLocatorInterface;
 
 /**
  * 
@@ -22,43 +21,23 @@ use Aura\Sql\Connection\ConnectionLocatorInterface;
  */
 class QueryFactory implements QueryFactoryInterface
 {
-    public function __construct(ConnectionLocatorInterface $connections)
+    public function newDelete(ConnectionInterface $connection)
     {
-        $this->connections = $connections;
+        return new Delete($connection);
     }
     
-    public function newDelete(ConnectionInterface $connection = null)
+    public function newInsert(ConnectionInterface $connection)
     {
-        return new Delete($this->getConnection('write', $connection));
+        return new Insert($connection);
     }
     
-    public function newInsert(ConnectionInterface $connection = null)
+    public function newSelect(ConnectionInterface $connection)
     {
-        return new Insert($this->getConnection('write', $connection));
+        return new Select($connection);
     }
     
-    public function newSelect(ConnectionInterface $connection = null)
+    public function newUpdate(ConnectionInterface $connection)
     {
-        return new Select($this->getConnection('read', $connection));
-    }
-    
-    public function newUpdate(ConnectionInterface $connection = null)
-    {
-        return new Update($this->getConnection('write', $connection));
-    }
-    
-    protected function getConnection($type, $connection)
-    {
-        if ($connection) {
-            return $connection;
-        }
-        
-        if ($type == 'read') {
-            return $this->connections->getRead();
-        }
-        
-        if ($type == 'write') {
-            return $this->connections->getWrite();
-        }
+        return new Update($connection);
     }
 }
