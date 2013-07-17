@@ -23,7 +23,7 @@ a `Connection` object.
 
 ```php
 <?php
-$connection = new SqliteConnection(...);
+$connection = new MysqlConnection(...);
 $select = $query_factory->newSelect($connection);
 ?>
 ```
@@ -110,7 +110,7 @@ a `Connection` object.
 
 ```php
 <?php
-$connection = new SqliteConnection(...);
+$connection = new MysqlConnection(...);
 $insert = $query_factory->newInsert($connection);
 ?>
 ```
@@ -157,7 +157,7 @@ a `Connection` object.
 
 ```php
 <?php
-$connection = new SqliteConnection(...);
+$connection = new MysqlConnection(...);
 $update = $query_factory->newUpdate($connection);
 ?>
 ```
@@ -199,7 +199,7 @@ a `Connection` object.
 
 ```php
 <?php
-$connection = new SqliteConnection(...);
+$connection = new MysqlConnection(...);
 $delete = $query_factory->newDelete($connection);
 ?>
 ```
