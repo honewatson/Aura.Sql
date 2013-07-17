@@ -108,7 +108,7 @@ $pdo = new PDO(...);
 $sth = $pdo->prepare('SELECT * FROM test WHERE foo = :foo AND bar = :bar');
 $sth->bindValue('foo', 'foo_value');
 $sth->bindValue('bar', 'bar_value');
-$stm = $sth->execute();
+$sth->execute();
 
 // ExtendedPdo
 $pdo = new ExtendedPdo(...);
