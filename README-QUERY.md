@@ -32,59 +32,252 @@ $select = $query_factory->newSelect($connection);
 ?>
 ```
 
-You can then modify the `Select` object to form your query.
+You can then modify the `Select` object to form your query and call a
+`fetch*()` method to get the results.
 
 ```php
 <?php
 // SELECT * FROM foo WHERE bar > :bar ORDER BY baz LIMIT 10 OFFSET 20
-$select->cols(['*'])
+$select->cols('*')
        ->from('foo')
        ->where('bar > :bar')
        ->orderBy('baz');
        ->limit(10)
        ->offset(20);
-?>
-```
 
-The `Select` object has the following methods and more; please read the source
-code for more information.
-
-- `distinct($flag)`: Set to `true` for a `SELECT DISTINCT`.
-
-- `cols((array) $cols)`: Select these columns.
-
-- `from((array) $tables)`: Select from these tables.
-
-- `join($type, $table, $on)`: Join these tables on specified conditions.
-
-- `where($cond, $value)`: `WHERE` these conditions are met (using `AND`).
-
-- `orWhere($cond, $value)`: `WHERE` these conditions are met (using `OR`).
-
-- `groupBy((array) $cols)`: `GROUP BY` these columns.
-
-- `having($cond, $value)`: `HAVING` these conditions met (using `AND`).
-
-- `orHaving($cond, $value)`: `HAVING` these conditions met (using `OR`).
-
-- `orderBy((array) $cols)`: `ORDER BY` these columns.
-
-- `limit($count)`: `LIMIT` to this many rows.
-
-- `offset($offset)`: `OFFSET` by this many rows.
-
-- `union()`: `UNION` with a followup `SELECT`.
-
-- `unionAll()`: `UNION ALL` with a followup `SELECT`.
-
-Once you build the query, you can then bind values and fetch results:
-
-```php
-<?php
 $select->bindValues(['bar' => '88']);
 $result = $select->fetchAll();
 ?>
 ```
+
+### DISTINCT
+
+Use the `distinct()` method set a DISTINCT clause.
+
+```php
+<?php
+// SELECT DISTINCT
+$select->distinct(true); // false to turn off DISTINCT
+?>
+```
+
+### Columns
+
+The `cols()` method specifies which columns to select from the `FROM` and
+`JOIN` tables. Multiple calls to `cols()` will append to the existing list.
+
+```php
+<?php
+// SELECT foo, bar AS barbar, baz, dib
+$select->cols('foo');
+$select->cols('bar AS barbar');
+$select->cols(['baz', 'dib']);
+?>
+```
+
+### FROM
+
+Specify the `FROM` clause using the from() method. Multiple calls to `from()`
+will append to the existing list.
+
+```php
+<?php
+// SELECT ... FROM foo, bar AS barbar, baz, dib
+$select->from('foo');
+$select->from('bar AS barbar');
+$select->from(['baz', 'dib']);
+?>
+```
+
+To select from a sub-select, use `fromSubSelect()` and pass the query string
+with an alias.
+
+```php
+<?php
+// SELECT ... FROM (SELECT * FROM foo) AS subfoo
+$select->fromSubSelect('SELECT * FROM foo', 'subfoo');
+?>
+```
+
+### JOIN
+
+`JOIN` to another table using the `join()` method.  Pass a join type, the
+table (and alias) to join to, and the conditions.
+
+```php
+<?php
+// SELECT FROM foo AS f INNER JOIN bar AS b ON f.id = b.id
+$select->from('foo AS f');
+$select->join('inner', 'bar AS b', 'f.id = b.id');
+
+// SELECT FROM foo NATURAL JOIN bar
+$select->from('foo');
+$select->join('natural', 'bar');
+?>
+```
+
+To join to a sub-select, use the `joinSubSelect()` method. Pass a join type,
+the sub-select query string, an alias for the sub-select, and the conditions.
+
+```php
+<?php
+// SELECT FROM foo AS f LEFT JOIN (SELECT * FROM bar) AS b ON f.id = b.id
+$select->from('foo AS f');
+$select->joinSubSelect('left', 'SELECT * FROM bar', 'b', 'f.id = b.id');
+?>
+```
+
+### WHERE
+
+Set `WHERE` conditions with the `where()` method.  Pass a condition,
+optionally with a value to quote into condition immediately. Multiple calls
+to `where()` will cause the conditions to be `AND`ed.
+
+```php
+<?php
+// SELECT ... WHERE foo = bar AND baz = 'dib' AND zim IN (:zim)
+$select->where('foo = bar');
+$select->where('baz = ?', 'dib');
+$select->where('zim IN (:zim)');
+?>
+```
+
+To add an `OR`, use `orWhere()`.
+
+```php
+<?php
+// SELECT ... WHERE (foo = bar OR baz = 'dib') AND zim IN (:zim)
+// -- note the placement of parentheses to set precedence
+$select->where('(foo = bar');
+$select->orWhere('baz = ?)', 'dib');
+$select->where('zim IN (:zim)');
+?>
+```
+
+### GROUP BY
+
+To group the results, call `groupBy()`.  Multiple calls to `groupBy()` will
+add to the existing groupings.
+
+```php
+<?php
+// SELECT ... GROUP BY foo, bar, baz, dib
+$select->groupBy('foo');
+$select->groupBy('bar');
+$select->groupBy(['baz', 'dib']);
+?>
+```
+
+### HAVING
+
+Set `HAVING` conditions with the `having()` method.  Pass a condition,
+optionally with a value to quote into condition immediately. Multiple calls
+to `having()` will cause the conditions to be `AND`ed.
+
+```php
+<?php
+// SELECT ... HAVING foo = bar AND baz = 'dib' AND zim IN (:zim)
+$select->having('foo = bar');
+$select->having('baz = ?', 'dib');
+$select->having('zim IN (:zim)');
+?>
+```
+
+To add an `OR`, use `orHaving()`.
+
+```php
+<?php
+// SELECT ... HAVING (foo = bar OR baz = 'dib') AND zim IN (:zim)
+// -- note the placement of parentheses to set precedence
+$select->having('(foo = bar');
+$select->orHaving('baz = ?)', 'dib');
+$select->having('zim IN (:zim)');
+?>
+```
+
+### ORDER BY
+
+To order the results, call `orderBy()`.  Multiple calls to `orderBy()` will
+add to the existing orderings.
+
+```php
+<?php
+// SELECT ... ORDER BY foo, bar DESC, baz, dib
+$select->orderBy('foo');
+$select->orderBy('bar DESC');
+$select->orderBy(['baz', 'dib']);
+?>
+```
+
+### LIMIT ... OFFSET, and Paging
+
+Add a LIMIT and OFFSET with the `limit()` and `offset()` methods.
+
+```php
+<?php
+// SELECT ... LIMIT 10 OFFSET 20
+$select->limit(10);
+$select->offset(20);
+?>
+```
+
+Alternatively, one can get a "page" of results.  Set the number of results
+per "page" using `setPaging()`, and then set the page number with `page()`.
+(This will reset any existing LIMIT and OFFSET).
+
+```php
+<?php
+// 10 rows per "page"
+$select->setPaging(10);
+// select the second "page"
+$select->page(2);
+?>
+```
+
+### UNION
+
+Implement a `UNION` with a second query using the `union()` or `unionAll()`
+method; this will convert the existing `Select` object to a string and reset
+its clauses for a second query.
+
+```php
+<?php
+// SELECT id FROM foo
+// UNION
+// SELECT id FROM bar
+// UNION ALL
+// SELECT id from baz
+// ORDER BY id
+$select->cols('id')
+       ->from('foo');
+       
+$select->union()
+       ->cols('id')
+       ->from('bar');
+
+$select->unionAll()
+       ->cols('id')
+       ->from('baz')
+       ->orderBy('id');
+?>
+```
+
+### Binding Values
+Bind values to the query using the `bindValues()` method. Multiple calls to
+`bindValues()` will merge, not reset, the bound values.
+
+```php
+<?php
+// SELECT * FROM foo WHERE id IN ('1', '2', '3')
+$select->cols('*')
+       ->from('foo')
+       ->where('id IN (:id_list)');
+
+$select->bindValues(['id' => ['1, 2, 3']]);
+?>
+```
+
+### Fetching Results
 
 The `Select` object has the same `fetch*()` methods as the `ExtendedPdo`
 object:
