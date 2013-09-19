@@ -10,7 +10,7 @@
  */
 namespace Aura\Sql\Mapper;
 
-use Aura\Sql\Connection\ConnectionLocatorInterface;
+use Aura\Sql\PdoLocatorInterface;
 use Aura\Sql\Query\QueryFactoryInterface;
 
 /**
@@ -24,9 +24,9 @@ class Gateway
 {
     /**
      * 
-     * A ConnectionLocator for database connections.
+     * A PdoLocator for database connections.
      * 
-     * @var ConnectionLocatorInterface
+     * @var PdoLocatorInterface
      * 
      */
     protected $connections;
@@ -44,14 +44,14 @@ class Gateway
      * 
      * Constructor.
      * 
-     * @param ConnectionLocatorInterface $connections A ConnectionLocator for database
+     * @param PdoLocatorInterface $connections A PdoLocator for database
      * connections.
      * 
      * @param MapperInterface $mapper A table-to-entity mapper.
      * 
      */
     public function __construct(
-        ConnectionLocatorInterface $connections,
+        PdoLocatorInterface $connections,
         QueryFactoryInterface $query_factory,
         MapperInterface $mapper
     ) {
@@ -64,7 +64,7 @@ class Gateway
      * 
      * Gets the connection locator.
      * 
-     * @return ConnectionLocatorInterface
+     * @return PdoLocatorInterface
      * 
      */
     public function getConnections()

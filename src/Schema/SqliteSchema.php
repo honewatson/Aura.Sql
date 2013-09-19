@@ -5,6 +5,23 @@ class SqliteSchema extends AbstractSchema
 {
     /**
      * 
+     * Constructor.
+     * 
+     * @param PdoInterface $connection A database connection.
+     * 
+     * @param ColumnFactory $column_factory A column object factory.
+     * 
+     */
+    public function __construct(
+        PdoSqlite $pdo,
+        ColumnFactory $column_factory
+    ) {
+        $this->pdo = $pdo;
+        $this->column_factory = $column_factory;
+    }
+    
+    /**
+     * 
      * The string used for SQLite autoincrement data types.
      * 
      * This is different for versions 2 and 3 of SQLite.
@@ -40,7 +57,7 @@ class SqliteSchema extends AbstractSchema
             ";
         }
 
-        return $this->connection->fetchCol($cmd);
+        return $this->pdo->fetchCol($cmd);
     }
 
     /**
@@ -75,11 +92,11 @@ class SqliteSchema extends AbstractSchema
             SELECT sql FROM {$schema}sqlite_master
             WHERE type = 'table' AND name = :table
         ";
-        $create_table = $this->connection->fetchValue($cmd, array('table' => $table));
+        $create_table = $this->pdo->fetchValue($cmd, array('table' => $table));
 
         // get the column descriptions
-        $table = $this->connection->quoteName($table);
-        $raw_cols = $this->connection->fetchAll("PRAGMA {$schema}TABLE_INFO($table)");
+        $table = $this->pdo->quoteName($table);
+        $raw_cols = $this->pdo->fetchAll("PRAGMA {$schema}TABLE_INFO($table)");
 
         // loop through the result rows; each describes a column.
         foreach ($raw_cols as $val) {

@@ -2,7 +2,7 @@
 namespace Aura\Sql\Mapper;
 
 use Aura\Sql\Assertions;
-use Aura\Sql\Connection\ConnectionLocator;
+use Aura\Sql\ConnectionLocator;
 use Aura\Sql\Setup;
 use Aura\Sql\Query\QueryFactory;
 use Aura\Sql\Setup\SqliteSetup;

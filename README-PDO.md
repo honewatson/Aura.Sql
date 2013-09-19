@@ -1,15 +1,15 @@
 Aura.Sql.Pdo
 ============
 
-This library provides an `ExtendedPdo` class that is an extension of the
+This library provides an `Pdo` class that is an extension of the
 PHP-native `PDO` class (read more about `PDO` [here](http://php.net/PDO).) Among
 other things, this means that code already using `PDO` or typehinted to `PDO` can
-use `ExtendedPdo` with no changes to existing code.
+use `Pdo` with no changes to existing code.
 
 
-Added functionality in `ExtendedPdo` includes:
+Added functionality in `Pdo` includes:
 
-- **Lazy connection.** `ExtendedPdo` connects to the database only on method
+- **Lazy connection.** `Pdo` connects to the database only on method
   calls that require a connection. This means you can create an instance
   and not incur the cost of a connection if you never make a query.
 
@@ -53,9 +53,9 @@ allows you to pass `PDO` attributes to be set after the connection is made.
 
 ```php
 <?php
-use Aura\Sql\Pdo\ExtendedPdo;
+use Aura\Sql\Pdo\Pdo;
 
-$pdo = new ExtendedPdo(
+$pdo = new Pdo(
     'mysql:host=localhost;dbname=test',
     'username',
     'password',
@@ -69,7 +69,7 @@ $pdo = new ExtendedPdo(
 Lazy Connection
 ---------------
 
-Whereas `PDO` connects on instantiation, `ExtendedPdo` does not connect
+Whereas `PDO` connects on instantiation, `Pdo` does not connect
 immediately. Instead, it connects only when you call a method that actually
 needs the connection to the database; e.g., on `query()`.
 
@@ -77,10 +77,10 @@ If you want to force a connection, call the `connect()` method.
 
 ```php
 <?php
-use Aura\Sql\Pdo\ExtendedPdo;
+use Aura\Sql\Pdo\Pdo;
 
 // does not connect to the database
-$pdo = new ExtendedPdo(
+$pdo = new Pdo(
     'mysql:host=localhost;dbname=test',
     'username',
     'password'
@@ -98,7 +98,7 @@ Bind Values
 -----------
 
 Instead of having to bind values to a prepared `PDOStatement`, you can call
-`bindValues()` directly on the `ExtendedPdo` instance, and those values will
+`bindValues()` directly on the `Pdo` instance, and those values will
 be bound to named placeholders in the next query.
 
 ```php
@@ -110,8 +110,8 @@ $sth->bindValue('foo', 'foo_value');
 $sth->bindValue('bar', 'bar_value');
 $sth->execute();
 
-// ExtendedPdo
-$pdo = new ExtendedPdo(...);
+// Pdo
+$pdo = new Pdo(...);
 $pdo->bindValues([ 'foo' => 'foo_value', 'bar' => 'bar_value']);
 $sth = $pdo->query('SELECT * FROM test WHERE foo = :foo AND bar = :bar');
 ?>
@@ -122,7 +122,7 @@ Array Quoting
 
 The normal `PDO::quote()` method will not quote arrays. This makes it
 difficult to bind an array to something like an `IN (...)` condition in SQL.
-However, `ExtendedPdo` recognizes arrays and converts them into
+However, `Pdo` recognizes arrays and converts them into
 comma-separated quoted strings.
 
 ```php
@@ -135,15 +135,15 @@ $array = ['foo', 'bar', 'baz'];
 $pdo = new Pdo(...);
 $cond = 'IN (' . $pdo->quote($array) . ')';
 
-// the ExtendedPdo way:
+// the Pdo way:
 // "IN ('foo', 'bar', 'baz')"
-$pdo = new ExtendedPdo(...);
+$pdo = new Pdo(...);
 $cond = 'IN (' . $pdo->quote($array) . ')'; 
 ?>
 ```
 
 Whereas the normal `PDO::prepare()` does not deal with bound array values,
-`ExtendedPdo` modifies the query string to replace the named placeholder with
+`Pdo` modifies the query string to replace the named placeholder with
 the quoted array.  Note that this is *not* the same thing as binding proper;
 the query string itself is modified before passing to the database for value
 binding.
@@ -161,28 +161,28 @@ $pdo = new Pdo(...);
 $sth = $pdo->prepare($stm);
 $sth->bindValue('foo', $array);
 
-// the ExtendedPdo way quotes the array and replaces the array placeholder
+// the Pdo way quotes the array and replaces the array placeholder
 // directly in the query string
-$pdo = new ExtendedPdo(...);
+$pdo = new Pdo(...);
 $pdo->bindValues(
     'foo' => ['foo', 'bar', 'baz'],
     'bar' => 'qux',
 );
 $sth = $pdo->prepare($stm);
 echo $sth->queryString;
-// the query string has been modified by ExtendedPdo to become
+// the query string has been modified by Pdo to become
 // "SELECT * FROM test WHERE foo IN ('foo', 'bar', 'baz') AND bar = :bar"
 ?>
 ```
 
-Finally, note that array quoting works only on the `ExtendedPdo` instance, not
+Finally, note that array quoting works only on the `Pdo` instance, not
 on returned `PDOStatement` instances.
 
 
 Fetch Methods
 -------------
 
-`ExtendedPdo` comes with `fetch*()` methods to reduce boilerplate code. Instead
+`Pdo` comes with `fetch*()` methods to reduce boilerplate code. Instead
 of issuing prepare(), a series of bindValue() calls, execute(), and then fetch*()
 on a `PDOStatement`, you can bind values and fetch results in one call.
 
@@ -200,8 +200,8 @@ $stm->bindValue('bar', $bind['bar']);
 $sth = $stm->execute();
 $result = $sth->fetchAll(PDO::FETCH_ASSOC);
 
-// the ExtendedPdo way to "fetch all"
-$pdo = new ExtendedPdo(...);
+// the Pdo way to "fetch all"
+$pdo = new Pdo(...);
 $result = $pdo->fetchAll($stm, $bind);
 
 // fetchAssoc() returns an associative array of all rows where the key is the
@@ -229,15 +229,15 @@ Profiler
 
 When debugging, it is often useful to see what queries have been executed,
 where they were issued from in the codebase, and how long they took to
-complete. `ExtendedPdo` comes with an optional profiler that you can use to
+complete. `Pdo` comes with an optional profiler that you can use to
 discover that information.
 
 ```php
 <?php
-use Aura\Sql\Pdo\ExtendedPdo;
+use Aura\Sql\Pdo\Pdo;
 use Aura\Sql\Pdo\Profiler;
 
-$pdo = new ExtendedPdo(...);
+$pdo = new Pdo(...);
 $pdo->setProfiler(new Profiler);
 
 // ...
@@ -251,7 +251,7 @@ $profiles = $pdo->getProfiler()->getProfiles();
 
 Each profile entry will have these keys:
 
-- `method`: The method that was called on `ExtendedPdo` that created the
+- `method`: The method that was called on `Pdo` that created the
   profile entry.
 
 - `duration`: How long the query took to complete, in seconds.
@@ -264,14 +264,14 @@ Each profile entry will have these keys:
 - `trace`: An exception stack trace indicating where the query was issued from
   in the codebase.
 
-Setting the `Profiler` into the `ExtendedPdo` instance is optional. Once it it
+Setting the `Profiler` into the `Pdo` instance is optional. Once it it
 set, you can activate and deactivate it as you wish using the
 `Profiler::setActive()` method. When not active, query profiles will not be
 retained.
 
 ```php
 <?php
-$pdo = new ExtendedPdo(...);
+$pdo = new Pdo(...);
 $pdo->setProfiler(new Profiler);
 
 // deactivate, issue a query, and reactivate;

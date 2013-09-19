@@ -40,7 +40,7 @@ trait ValuesTrait
      */
     public function col($col)
     {
-        $key = $this->connection->quoteName($col);
+        $key = $this->pdo->quoteName($col);
         $this->values[$key] = ":$col";
         return $this;
     }
@@ -80,8 +80,8 @@ trait ValuesTrait
             $value = 'NULL';
         }
 
-        $key = $this->connection->quoteName($col);
-        $value = $this->connection->quoteNamesIn($value);
+        $key = $this->pdo->quoteName($col);
+        $value = $this->pdo->quoteNamesIn($value);
         $this->values[$key] = $value;
         return $this;
     }

@@ -10,8 +10,7 @@
  */
 namespace Aura\Sql\Query;
 
-use Aura\Sql\Connection\ConnectionInterface;
-
+PdoInterface
 /**
  * 
  * Creates query statement objects.
@@ -21,23 +20,23 @@ use Aura\Sql\Connection\ConnectionInterface;
  */
 class QueryFactory implements QueryFactoryInterface
 {
-    public function newDelete(ConnectionInterface $connection)
+    public function newDelete(PdoInterface pdo)
     {
-        return new Delete($connection);
+        return new Delete(pdo);
     }
     
-    public function newInsert(ConnectionInterface $connection)
+    public function newInsert(PdoInterface pdo)
     {
-        return new Insert($connection);
+        return new Insert(pdo);
     }
     
-    public function newSelect(ConnectionInterface $connection)
+    public function newSelect(PdoInterface pdo)
     {
-        return new Select($connection);
+        return new Select(pdo);
     }
     
-    public function newUpdate(ConnectionInterface $connection)
+    public function newUpdate(PdoInterface pdo)
     {
-        return new Update($connection);
+        return new Update(pdo);
     }
 }

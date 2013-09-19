@@ -5,6 +5,23 @@ class PgsqlSchema extends AbstractSchema
 {
     /**
      * 
+     * Constructor.
+     * 
+     * @param PdoInterface $connection A database connection.
+     * 
+     * @param ColumnFactory $column_factory A column object factory.
+     * 
+     */
+    public function __construct(
+        PdoPgsql $pdo,
+        ColumnFactory $column_factory
+    ) {
+        $this->pdo = $pdo;
+        $this->column_factory = $column_factory;
+    }
+    
+    /**
+     * 
      * Returns a list of all tables in the database.
      * 
      * @param string $schema Fetch tbe list of tables in this schema; 
@@ -30,7 +47,7 @@ class PgsqlSchema extends AbstractSchema
             ";
         }
 
-        return $this->connection->fetchCol($cmd, array('schema' => $schema));
+        return $this->pdo->fetchCol($cmd, array('schema' => $schema));
     }
 
     /**
@@ -77,7 +94,7 @@ class PgsqlSchema extends AbstractSchema
         $cols = array();
 
         // get the column descriptions
-        $raw_cols = $this->connection->fetchAll($cmd, array(
+        $raw_cols = $this->pdo->fetchAll($cmd, array(
             'table' => $table,
             'schema' => $schema,
         ));

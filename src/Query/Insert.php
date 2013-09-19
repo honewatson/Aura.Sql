@@ -57,12 +57,12 @@ class Insert extends AbstractQuery
      */
     public function into($table)
     {
-        $this->table = $this->connection->quoteName($table);
+        $this->table = $this->pdo->quoteName($table);
         return $this;
     }
     
     public function lastInsertId($col)
     {
-        return $this->connection->lastInsertId($this->table, $col);
+        return $this->pdo->lastInsertId($this->table, $col);
     }
 }

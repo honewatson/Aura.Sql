@@ -1,7 +1,7 @@
 <?php
 namespace Aura\Sql\Query;
 
-use Aura\Sql\Connection\SqliteConnection;
+use Aura\Sql\SqliteConnection;
 
 class SelectTest extends AbstractQueryTest
 {

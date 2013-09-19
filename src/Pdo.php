@@ -1,7 +1,6 @@
 <?php
-namespace Aura\Sql\Pdo;
+namespace Aura\Sql;
 
-use PDO;
 use PDOStatement;
 
 /**
@@ -18,6 +17,10 @@ use PDOStatement;
  *   be replaced with comma-separated quoted values. This means you can bind
  *   an array of values to a placeholder used with an `IN (...)` condition.
  * 
+ * - Quoting values into placeholders.
+ * 
+ * - Quoting identifier names.
+ * 
  * - Bind values. You may provide values for binding to the next query using
  *   bindValues(). Mulitple calls to bindValues() will merge, not reset, the
  *   values. The values will be reset after calling query(), exec(),
@@ -32,29 +35,53 @@ use PDOStatement;
  * By defult, it starts in the ERRMODE_EXCEPTION instead of ERRMODE_SILENT.
  * 
  */
-class ExtendedPdo extends PDO implements ExtendedPdoInterface
+class Pdo extends \PDO implements PdoInterface
 {
-    protected $bind_values = [];
+    const ATTR_QUOTE_NAME_PREFIX = 'quote_name_prefix';
     
-    protected $dsn;
+    const ATTR_QUOTE_NAME_SUFFIX = 'quote_name_suffix';
     
-    protected $username;
+    protected $attributes = array(
+        self::ATTR_ERRMODE              => PDO::ERRMODE_EXCEPTION,
+        self::ATTR_EMULATE_PREPARES     => true,
+        self::ATTR_QUOTE_NAME_PREFIX    => '"',
+        self::ATTR_QUOTE_NAME_SUFFIX    => '"',
+    );
     
-    protected $password;
-    
-    protected $options = [];
-    
-    protected $attributes = [
-        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-        PDO::ATTR_EMULATE_PREPARES => true,
-    ];
+    protected $bind_values = array();
     
     protected $connected = false;
     
+    protected $dsn;
+    
+    protected $options = array();
+    
+    protected $password;
+    
+    protected $profile;
+    
     protected $profiler;
     
-    protected $profile_info;
+    protected $username;
     
+    /**
+     * 
+     * The prefix to use when quoting identifier names.
+     * 
+     * @var string
+     * 
+     */
+    protected $quote_name_prefix = '"';
+
+    /**
+     * 
+     * The suffix to use when quoting identifier names.
+     * 
+     * @var string
+     * 
+     */
+    protected $quote_name_suffix = '"';
+
     /**
      * 
      * Constructor; retains connection information but does not make a
@@ -71,8 +98,6 @@ class ExtendedPdo extends PDO implements ExtendedPdoInterface
      * @param array $attributes Attributes to set after connection.
      * 
      * @see http://php.net/manual/en/pdo.construct.php
-     * 
-     * @see connect()
      * 
      */
     public function __construct(
@@ -135,15 +160,39 @@ class ExtendedPdo extends PDO implements ExtendedPdoInterface
     
     public function setAttribute($attribute, $value)
     {
+        $is_attr_quote_name = $attribute == self::ATTR_QUOTE_NAME_PREFIX
+                           || $attribute == self::ATTR_QUOTE_NAME_SUFFIX;
+        if ($is_attr_quote_name) {
+            return $this->setAttributeQuoteName($attribute, $value);
+        }
+        
         if ($this->connected) {
             return parent::setAttribute($attribute, $value);
-        } else {
-            $this->attributes[$attribute] = $value;
         }
+        
+        $this->attributes[$attribute] = $value;
+    }
+    
+    protected function setAttributeQuoteName($attribute, $value)
+    {
+        $value = trim($value);
+        if (! $value) {
+            $message = "PDO::ATTR_QUOTE_NAME_PREFIX/SUFFIX may not be empty.";
+            throw new Exception\AttrQuoteNameEmpty($message);
+        }
+        $this->$attribute = $value;
     }
     
     public function getAttribute($attribute)
     {
+        if ($attribute == self::ATTR_QUOTE_NAME_PREFIX) {
+            return $this->quote_name_prefix;
+        }
+        
+        if ($attribute == self::ATTR_QUOTE_NAME_SUFFIX) {
+            return $this->quote_name_suffix;
+        }
+        
         $this->connect();
         return parent::getAttribute($attribute);
     }
@@ -213,7 +262,7 @@ class ExtendedPdo extends PDO implements ExtendedPdoInterface
      * @see http://php.net/manual/en/pdo.prepare.php
      * 
      */
-    public function prepare($statement, $options = [])
+    public function prepare($statement, $options = array())
     {
         $this->connect();
         
@@ -279,7 +328,7 @@ class ExtendedPdo extends PDO implements ExtendedPdoInterface
             $sth->bindValue($key, $this->bind_values[$key]);
         }
 
-        // clear out bind values, and done!
+        // done
         return $sth;
     }
     
@@ -303,7 +352,7 @@ class ExtendedPdo extends PDO implements ExtendedPdoInterface
         $sth->execute();
         $this->endProfile($sth);
         
-        $this->bind_values = [];
+        $this->bind_values = array();
         return $sth->rowCount();
     }
     
@@ -349,7 +398,7 @@ class ExtendedPdo extends PDO implements ExtendedPdoInterface
         }
         
         // done
-        $this->bind_values = [];
+        $this->bind_values = array();
         return $sth;
     }
     
@@ -381,14 +430,14 @@ class ExtendedPdo extends PDO implements ExtendedPdoInterface
      * 
      * @param string $statement The SQL statement to prepare and execute.
      * 
-     * @param array $bind_values Values to bind to the query.
+     * @param array $values Values to bind to the query.
      * 
      * @return array
      * 
      */
-    public function fetchAll($statement, array $bind_values = [])
+    public function fetchAll($statement, array $values = array())
     {
-        $this->bindValues($bind_values);
+        $this->bindValues($values);
         $sth = $this->query($statement);
         return $sth->fetchAll(PDO::FETCH_ASSOC);
     }
@@ -404,16 +453,16 @@ class ExtendedPdo extends PDO implements ExtendedPdoInterface
      * 
      * @param string $statement The SQL statement to prepare and execute.
      * 
-     * @param array $bind_values Values to bind to the query.
+     * @param array $values Values to bind to the query.
      * 
      * @return array
      * 
      */
-    public function fetchAssoc($statement, array $bind_values = [])
+    public function fetchAssoc($statement, array $values = array())
     {
-        $this->bindValues($bind_values);
+        $this->bindValues($values);
         $sth = $this->query($statement);
-        $data = [];
+        $data = array();
         while ($row = $sth->fetch(PDO::FETCH_ASSOC)) {
             $key = current($row); // value of the first element
             $data[$key] = $row;
@@ -427,14 +476,14 @@ class ExtendedPdo extends PDO implements ExtendedPdoInterface
      * 
      * @param string $statement The SQL statement to prepare and execute.
      * 
-     * @param array $bind_values Values to bind to the query.
+     * @param array $values Values to bind to the query.
      * 
      * @return array
      * 
      */
-    public function fetchCol($statement, array $bind_values = [])
+    public function fetchCol($statement, array $values = array())
     {
-        $this->bindValues($bind_values);
+        $this->bindValues($values);
         $sth = $this->query($statement);
         return $sth->fetchAll(PDO::FETCH_COLUMN, 0);
     }
@@ -445,14 +494,14 @@ class ExtendedPdo extends PDO implements ExtendedPdoInterface
      * 
      * @param string $statement The SQL statement to prepare and execute.
      * 
-     * @param array $bind_values Values to bind to the query.
+     * @param array $values Values to bind to the query.
      * 
      * @return array
      * 
      */
-    public function fetchOne($statement, array $bind_values = [])
+    public function fetchOne($statement, array $values = array())
     {
-        $this->bindValues($bind_values);
+        $this->bindValues($values);
         $sth = $this->query($statement);
         return $sth->fetch(PDO::FETCH_ASSOC);
     }
@@ -464,14 +513,14 @@ class ExtendedPdo extends PDO implements ExtendedPdoInterface
      * 
      * @param string $statement The SQL statement to prepare and execute.
      * 
-     * @param array $bind_values Values to bind to the query.
+     * @param array $values Values to bind to the query.
      * 
      * @return array
      * 
      */
-    public function fetchPairs($statement, array $bind_values = [])
+    public function fetchPairs($statement, array $values = array())
     {
-        $this->bindValues($bind_values);
+        $this->bindValues($values);
         $sth = $this->query($statement);
         return $sth->fetchAll(PDO::FETCH_KEY_PAIR);
     }
@@ -482,14 +531,14 @@ class ExtendedPdo extends PDO implements ExtendedPdoInterface
      * 
      * @param string $statement The SQL statement to prepare and execute.
      * 
-     * @param array $bind_values Values to bind to the query.
+     * @param array $values Values to bind to the query.
      * 
      * @return mixed
      * 
      */
-    public function fetchValue($statement, array $bind_values = [])
+    public function fetchValue($statement, array $values = array())
     {
-        $this->bindValues($bind_values);
+        $this->bindValues($values);
         $sth = $this->query($statement);
         return $sth->fetchColumn(0);
     }
@@ -619,9 +668,9 @@ class ExtendedPdo extends PDO implements ExtendedPdoInterface
         }
         
         // retain starting profile info
-        $this->profile_info['time'] = microtime(true);
-        $this->profile_info['function'] = $function;
-        $this->profile_info['bind_values'] = $this->bind_values;
+        $this->profile['time'] = microtime(true);
+        $this->profile['function'] = $function;
+        $this->profile['bind_values'] = $this->bind_values;
     }
     
     protected function endProfile(PDOStatement $sth = null)
@@ -633,14 +682,260 @@ class ExtendedPdo extends PDO implements ExtendedPdoInterface
         
         // add an entry to the profiler
         $this->profiler->addProfile(
-            microtime(true) - $this->profile_info['time'],
-            $this->profile_info['function'],
+            microtime(true) - $this->profile['time'],
+            $this->profile['function'],
             $sth ? $sth->queryString : null,
-            $this->profile_info['bind_values']
+            $this->profile['bind_values']
         );
         
         // clear the starting profile info
-        $this->profile_info = [];
+        $this->profile = array();
     }
     
+    /**
+     * 
+     * Given a string with question-mark placeholders, quotes the values into
+     * the string, replacing the placeholders sequentially.
+     * 
+     * @param string $string The string with placeholders.
+     * 
+     * @param mixed $values The values to quote into the placeholders.
+     * 
+     * @return mixed An SQL-safe quoted value (or string of separated values)
+     * placed into the original string.
+     * 
+     * @see quoteValue()
+     * 
+     */
+    public function quoteReplace($string, $values)
+    {
+        // how many placeholders are there?
+        $count = substr_count($string, '?');
+        if (! $count) {
+            // no replacements needed
+            return $string;
+        }
+
+        // only one placeholder?
+        if ($count == 1) {
+            $values = $this->quote($values);
+            $string = str_replace('?', $values, $string);
+            return $string;
+        }
+
+        // more than one placeholder
+        $offset = 0;
+        foreach ((array) $values as $val) {
+
+            // find the next placeholder
+            $pos = strpos($string, '?', $offset);
+            if ($pos === false) {
+                // no more placeholders, exit the data loop
+                break;
+            }
+
+            // replace this question mark with a quoted value
+            $val  = $this->quote($val);
+            $string = substr_replace($string, $val, $pos, 1);
+
+            // update the offset to move us past the quoted value
+            $offset = $pos + strlen($val);
+        }
+
+        return $string;
+    }
+
+    /**
+     * 
+     * Quotes a single identifier name (table, table alias, table column, 
+     * index, sequence).
+     * 
+     * If the name contains `' AS '`, this method will separately quote the
+     * parts before and after the `' AS '`.
+     * 
+     * If the name contains a space, this method will separately quote the
+     * parts before and after the space.
+     * 
+     * If the name contains a dot, this method will separately quote the
+     * parts before and after the dot.
+     * 
+     * @param string $name The identifier name to quote.
+     * 
+     * @return string|array The quoted identifier name.
+     * 
+     * @see replaceName()
+     * 
+     */
+    public function quoteName($name)
+    {
+        // remove extraneous spaces
+        $name = trim($name);
+
+        // `original` AS `alias` ... note the 'rr' in strripos
+        $pos = strripos($name, ' AS ');
+        if ($pos) {
+            // recurse to allow for "table.col"
+            $orig  = $this->quoteName(substr($name, 0, $pos));
+            // use as-is
+            $alias = $this->replaceName(substr($name, $pos + 4));
+            // done
+            return "$orig AS $alias";
+        }
+
+        // `original` `alias`
+        $pos = strrpos($name, ' ');
+        if ($pos) {
+            // recurse to allow for "table.col"
+            $orig = $this->quoteName(substr($name, 0, $pos));
+            // use as-is
+            $alias = $this->replaceName(substr($name, $pos + 1));
+            // done
+            return "$orig $alias";
+        }
+
+        // `table`.`column`
+        $pos = strrpos($name, '.');
+        if ($pos) {
+            // use both as-is
+            $table = $this->replaceName(substr($name, 0, $pos));
+            $col   = $this->replaceName(substr($name, $pos + 1));
+            return "$table.$col";
+        }
+
+        // `name`
+        return $this->replaceName($name);
+    }
+
+    /**
+     * 
+     * Quotes all fully-qualified identifier names ("table.col") in a string,
+     * typically an SQL snippet for a SELECT clause.
+     * 
+     * Does not quote identifier names that are string literals (i.e., inside
+     * single or double quotes).
+     * 
+     * Looks for a trailing ' AS alias' and quotes the alias as well.
+     * 
+     * @param string $text The string in which to quote fully-qualified
+     * identifier names to quote.
+     * 
+     * @return string|array The string with names quoted in it.
+     * 
+     * @see replaceNamesIn()
+     * 
+     */
+    public function quoteNamesIn($text)
+    {
+        // single and double quotes
+        $apos = "'";
+        $quot = '"';
+
+        // look for ', ", \', or \" in the string.
+        // match closing quotes against the same number of opening quotes.
+        $list = preg_split(
+            "/(($apos+|$quot+|\\$apos+|\\$quot+).*?\\2)/",
+            $text,
+            -1,
+            PREG_SPLIT_DELIM_CAPTURE
+        );
+
+        // concat the pieces back together, quoting names as we go.
+        $text = null;
+        $last = count($list) - 1;
+        foreach ($list as $key => $val) {
+
+            // skip elements 2, 5, 8, 11, etc. as artifacts of the back-
+            // referenced split; these are the trailing/ending quote
+            // portions, and already included in the previous element.
+            // this is the same as every third element from zero.
+            if (($key+1) % 3 == 0) {
+                continue;
+            }
+
+            // is there an apos or quot anywhere in the part?
+            $is_string = strpos($val, $apos) !== false ||
+                         strpos($val, $quot) !== false;
+
+            if ($is_string) {
+                // string literal
+                $text .= $val;
+            } else {
+                // sql language.
+                // look for an AS alias if this is the last element.
+                if ($key == $last) {
+                    // note the 'rr' in strripos
+                    $pos = strripos($val, ' AS ');
+                    if ($pos) {
+                        // quote the alias name directly
+                        $alias = $this->replaceName(substr($val, $pos + 4));
+                        $val = substr($val, 0, $pos) . " AS $alias";
+                    }
+                }
+
+                // now quote names in the language.
+                $text .= $this->replaceNamesIn($val);
+            }
+        }
+
+        // done!
+        return $text;
+    }
+
+    /**
+     * 
+     * Quotes an identifier name (table, index, etc); ignores empty values and
+     * values of '*'.
+     * 
+     * @param string $name The identifier name to quote.
+     * 
+     * @return string The quoted identifier name.
+     * 
+     * @see quoteName()
+     * 
+     */
+    protected function replaceName($name)
+    {
+        $name = trim($name);
+        if ($name == '*') {
+            return $name;
+        } else {
+            return $this->quote_name_prefix
+                 . $name
+                 . $this->quote_name_suffix;
+        }
+    }
+
+    /**
+     * 
+     * Quotes all fully-qualified identifier names ("table.col") in a string.
+     * 
+     * @param string $text The string in which to quote fully-qualified
+     * identifier names to quote.
+     * 
+     * @return string|array The string with names quoted in it.
+     * 
+     * @see quoteNamesIn()
+     * 
+     */
+    protected function replaceNamesIn($text)
+    {
+        $word = "[a-z_][a-z0-9_]+";
+
+        $find = "/(\\b)($word)\\.($word)(\\b)/i";
+
+        $repl = '$1'
+              . $this->quote_name_prefix
+              . '$2'
+              . $this->quote_name_suffix
+              . '.'
+              . $this->quote_name_prefix
+              . '$3'
+              . $this->quote_name_suffix
+              . '$4'
+              ;
+
+        $text = preg_replace($find, $repl, $text);
+
+        return $text;
+    }
 }

@@ -8,17 +8,17 @@
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
  */
-namespace Aura\Sql\Connection;
+namespace Aura\Sql\Exception;
 
-use Aura\Sql\Exception as SqlException;
+use Aura\Sql\Exception;
 
 /**
  * 
- * Generic exception class for connections.
+ * PDO locator could not find a named service.
  * 
  * @package Aura.Sql
  * 
  */
-class Exception extends SqlException
+class ServiceNotFound extends Exception
 {
 }

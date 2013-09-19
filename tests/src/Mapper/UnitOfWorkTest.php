@@ -1,7 +1,7 @@
 <?php
 namespace Aura\Sql\Mapper;
 
-use Aura\Sql\Connection\ConnectionLocator;
+use Aura\Sql\ConnectionLocator;
 use Aura\Sql\Setup\SqliteSetup;
 use Aura\Sql\Query\QueryFactory;
 

@@ -1,13 +1,13 @@
 <?php
-namespace Aura\Sql\Connection;
+namespace Aura\Sql;
 
 use Aura\Sql\Profiler;
 use Aura\Sql\Query\QueryFactory;
 
-class ConnectionLocatorTest extends \PHPUnit_Framework_TestCase
+class PdoLocatorTest extends \PHPUnit_Framework_TestCase
 {
     /**
-     * @var ConnectionLocator
+     * @var PdoLocator
      */
     protected $locator;
     
@@ -20,7 +20,7 @@ class ConnectionLocatorTest extends \PHPUnit_Framework_TestCase
     protected function setUp()
     {
         $this->default = function () {
-            return new Mock(
+            return new MockPdo(
                 'mock:host=default.example.com',
                 'user_name',
                 'pass_word',
@@ -30,7 +30,7 @@ class ConnectionLocatorTest extends \PHPUnit_Framework_TestCase
         
         $this->read = [
             'read1' => function () {
-                return new Mock(
+                return new MockPdo(
                     'mock:host=read1.example.com',
                     'user_name',
                     'pass_word',
@@ -38,7 +38,7 @@ class ConnectionLocatorTest extends \PHPUnit_Framework_TestCase
                 );
             },
             'read2' => function () {
-                return new Mock(
+                return new MockPdo(
                     'mock:host=read2.example.com',
                     'user_name',
                     'pass_word',
@@ -46,7 +46,7 @@ class ConnectionLocatorTest extends \PHPUnit_Framework_TestCase
                 );
             },
             'read3' => function () {
-                return new Mock(
+                return new MockPdo(
                     'mock:host=read3.example.com',
                     'user_name',
                     'pass_word',
@@ -57,7 +57,7 @@ class ConnectionLocatorTest extends \PHPUnit_Framework_TestCase
         
         $this->write = [
             'write1' => function () {
-                return new Mock(
+                return new MockPdo(
                     'mock:host=write1.example.com',
                     'user_name',
                     'pass_word',
@@ -65,7 +65,7 @@ class ConnectionLocatorTest extends \PHPUnit_Framework_TestCase
                 );
             },
             'write2' => function () {
-                return new Mock(
+                return new MockPdo(
                     'mock:host=write2.example.com',
                     'user_name',
                     'pass_word',
@@ -73,7 +73,7 @@ class ConnectionLocatorTest extends \PHPUnit_Framework_TestCase
                 );
             },
             'write3' => function () {
-                return new Mock(
+                return new MockPdo(
                     'mock:host=write3.example.com',
                     'user_name',
                     'pass_word',
@@ -85,24 +85,24 @@ class ConnectionLocatorTest extends \PHPUnit_Framework_TestCase
     
     protected function newLocator($read = [], $write = [])
     {
-        return new ConnectionLocator($this->default, $read, $write);
+        return new PdoLocator($this->default, $read, $write);
     }
     
     public function testGetDefault()
     {
         $locator = $this->newLocator();
-        $conn = $locator->getDefault();
+        $pdo = $locator->getDefault();
         $expect = 'mock:host=default.example.com';
-        $actual = $conn->getDsn();
+        $actual = $pdo->getDsn();
         $this->assertSame($expect, $actual);
     }
     
     public function testGetReadDefault()
     {
         $locator = $this->newLocator();
-        $conn = $locator->getRead();
+        $pdo = $locator->getRead();
         $expect = 'mock:host=default.example.com';
-        $actual = $conn->getDsn();
+        $actual = $pdo->getDsn();
         $this->assertSame($expect, $actual);
     }
     
@@ -118,8 +118,8 @@ class ConnectionLocatorTest extends \PHPUnit_Framework_TestCase
         
         // try 10 times to make sure we get lots of random responses
         for ($i = 1; $i <= 10; $i++) {
-            $conn = $locator->getRead();
-            $actual = $conn->getDsn();
+            $pdo = $locator->getRead();
+            $actual = $pdo->getDsn();
             $this->assertTrue(in_array($actual, $expect));
         }
     }
@@ -127,25 +127,25 @@ class ConnectionLocatorTest extends \PHPUnit_Framework_TestCase
     public function testGetReadName()
     {
         $locator = $this->newLocator($this->read, $this->write);
-        $conn = $locator->getRead('read2');
+        $pdo = $locator->getRead('read2');
         $expect = 'mock:host=read2.example.com';
-        $actual = $conn->getDsn();
+        $actual = $pdo->getDsn();
         $this->assertSame($expect, $actual);
     }
     
     public function testGetReadMissing()
     {
         $locator = $this->newLocator($this->read, $this->write);
-        $this->setExpectedException('Aura\Sql\Connection\Exception\ConnectionNotFound');
-        $conn = $locator->getRead('no-such-connection');
+        $this->setExpectedException('Aura\Sql\Exception\ServiceNotFound');
+        $pdo = $locator->getRead('no-such-connection');
     }
     
     public function testGetWriteDefault()
     {
         $locator = $this->newLocator();
-        $conn = $locator->getWrite();
+        $pdo = $locator->getWrite();
         $expect = 'mock:host=default.example.com';
-        $actual = $conn->getDsn();
+        $actual = $pdo->getDsn();
         $this->assertSame($expect, $actual);
     }
     
@@ -161,8 +161,8 @@ class ConnectionLocatorTest extends \PHPUnit_Framework_TestCase
         
         // try 10 times to make sure we get lots of random responses
         for ($i = 1; $i <= 10; $i++) {
-            $conn = $locator->getWrite();
-            $actual = $conn->getDsn();
+            $pdo = $locator->getWrite();
+            $actual = $pdo->getDsn();
             $this->assertTrue(in_array($actual, $expect));
         }
     }
@@ -170,16 +170,16 @@ class ConnectionLocatorTest extends \PHPUnit_Framework_TestCase
     public function testGetWriteName()
     {
         $locator = $this->newLocator($this->write, $this->write);
-        $conn = $locator->getWrite('write2');
+        $pdo = $locator->getWrite('write2');
         $expect = 'mock:host=write2.example.com';
-        $actual = $conn->getDsn();
+        $actual = $pdo->getDsn();
         $this->assertSame($expect, $actual);
     }
     
     public function testGetWriteMissing()
     {
         $locator = $this->newLocator($this->write, $this->write);
-        $this->setExpectedException('Aura\Sql\Connection\Exception\ConnectionNotFound');
-        $conn = $locator->getWrite('no-such-connection');
+        $this->setExpectedException('Aura\Sql\Exception\ServiceNotFound');
+        $pdo = $locator->getWrite('no-such-connection');
     }
 }

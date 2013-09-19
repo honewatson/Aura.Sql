@@ -10,8 +10,7 @@
  */
 namespace Aura\Sql\Query;
 
-use Aura\Sql\Connection\ConnectionInterface;
-
+PdoInterface
 /**
  * 
  * Creates query statement objects.
@@ -21,8 +20,8 @@ use Aura\Sql\Connection\ConnectionInterface;
  */
 interface QueryFactoryInterface
 {
-    public function newDelete(ConnectionInterface $connection);
-    public function newInsert(ConnectionInterface $connection);
-    public function newSelect(ConnectionInterface $connection);
-    public function newUpdate(ConnectionInterface $connection);
+    public function newDelete(PdoInterface pdo);
+    public function newInsert(PdoInterface pdo);
+    public function newSelect(PdoInterface pdo);
+    public function newUpdate(PdoInterface pdo);
 }

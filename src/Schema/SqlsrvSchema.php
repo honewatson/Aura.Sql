@@ -5,6 +5,23 @@ class SqlsrvSchema extends AbstractSchema
 {
     /**
      * 
+     * Constructor.
+     * 
+     * @param PdoInterface $connection A database connection.
+     * 
+     * @param ColumnFactory $column_factory A column object factory.
+     * 
+     */
+    public function __construct(
+        PdoSqlsrv $pdo,
+        ColumnFactory $column_factory
+    ) {
+        $this->pdo = $pdo;
+        $this->column_factory = $column_factory;
+    }
+    
+    /**
+     * 
      * Returns a list of all tables in the database.
      * 
      * @param string $schema Fetch tbe list of tables in this schema; 
@@ -18,7 +35,7 @@ class SqlsrvSchema extends AbstractSchema
     public function fetchTableList($schema = null)
     {
         $text = "SELECT name FROM sysobjects WHERE type = 'U' ORDER BY name";
-        return $this->connection->fetchCol($text);
+        return $this->pdo->fetchCol($text);
     }
 
     /**
@@ -39,13 +56,13 @@ class SqlsrvSchema extends AbstractSchema
         list($schema, $table) = $this->splitName($spec);
 
         // get column info
-        $text = "exec sp_columns @table_name = " . $this->connection->quoteName($table);
-        $raw_cols = $this->connection->fetchAll($text);
+        $text = "exec sp_columns @table_name = " . $this->pdo->quoteName($table);
+        $raw_cols = $this->pdo->fetchAll($text);
 
         // get primary key info
         $text = "exec sp_pkeys @table_owner = " . $raw_cols[0]['TABLE_OWNER']
-              . ", @table_name = " . $this->connection->quoteName($table);
-        $raw_keys = $this->connection->fetchAll($text);
+              . ", @table_name = " . $this->pdo->quoteName($table);
+        $raw_keys = $this->pdo->fetchAll($text);
         $keys = [];
         foreach ($raw_keys as $row) {
             $keys[] = $row['COLUMN_NAME'];

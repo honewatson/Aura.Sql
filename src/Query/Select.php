@@ -209,7 +209,7 @@ class Select extends AbstractQuery
         }
 
         // modify with a limit clause per the connection
-        $this->connection->limit($text, $this->limit, $this->offset);
+        $this->pdo->limit($text, $this->limit, $this->offset);
 
         // for update?
         if ($this->for_update) {
@@ -293,7 +293,7 @@ class Select extends AbstractQuery
     public function cols(array $cols)
     {
         foreach ($cols as $col) {
-            $this->cols[] = $this->connection->quoteNamesIn($col);
+            $this->cols[] = $this->pdo->quoteNamesIn($col);
         }
         return $this;
     }
@@ -309,7 +309,7 @@ class Select extends AbstractQuery
      */
     public function from($spec)
     {
-        $this->from[] = $this->connection->quoteName($spec);
+        $this->from[] = $this->pdo->quoteName($spec);
         return $this;
     }
 
@@ -328,7 +328,7 @@ class Select extends AbstractQuery
     public function fromSubSelect($spec, $name)
     {
         $spec = ltrim(preg_replace('/^/m', '    ', (string) $spec));
-        $this->from[] = "($spec) AS " . $this->connection->quoteName($name);
+        $this->from[] = "($spec) AS " . $this->pdo->quoteName($name);
         return $this;
     }
 
@@ -348,9 +348,9 @@ class Select extends AbstractQuery
     public function join($join, $spec, $cond = null)
     {
         $join = strtoupper(ltrim("$join JOIN"));
-        $spec = $this->connection->quoteName($spec);
+        $spec = $this->pdo->quoteName($spec);
         if ($cond) {
-            $cond = $this->connection->quoteNamesIn($cond);
+            $cond = $this->pdo->quoteNamesIn($cond);
             $this->join[] = "$join $spec ON $cond";
         } else {
             $this->join[] = "$join $spec";
@@ -379,9 +379,9 @@ class Select extends AbstractQuery
     {
         $join = strtoupper(ltrim("$join JOIN"));
         $spec = ltrim(preg_replace('/^/m', '    ', (string) $spec));
-        $name = $this->connection->quoteName($name);
+        $name = $this->pdo->quoteName($name);
         if ($cond) {
-            $cond = $this->connection->quoteNamesIn($cond);
+            $cond = $this->pdo->quoteNamesIn($cond);
             $this->join[] = "$join ($spec) AS $name ON $cond";
         } else {
             $this->join[] = "$join ($spec) AS $name";
@@ -401,7 +401,7 @@ class Select extends AbstractQuery
     public function groupBy(array $spec)
     {
         foreach ($spec as $col) {
-            $this->group_by[] = $this->connection->quoteNamesIn($col);
+            $this->group_by[] = $this->pdo->quoteNamesIn($col);
         }
         return $this;
     }
@@ -433,10 +433,10 @@ class Select extends AbstractQuery
      */
     public function having($cond)
     {
-        $cond = $this->connection->quoteNamesIn($cond);
+        $cond = $this->pdo->quoteNamesIn($cond);
 
         if (func_num_args() > 1) {
-            $cond = $this->connection->quoteValuesIn($cond, func_get_arg(1));
+            $cond = $this->pdo->quoteReplace(($cond, func_get_arg(1));
         }
 
         if ($this->having) {
@@ -463,10 +463,10 @@ class Select extends AbstractQuery
      */
     public function orHaving($cond)
     {
-        $cond = $this->connection->quoteNamesIn($cond);
+        $cond = $this->pdo->quoteNamesIn($cond);
 
         if (func_num_args() > 1) {
-            $cond = $this->connection->quoteValuesIn($cond, func_get_arg(1));
+            $cond = $this->pdo->quoteReplace(($cond, func_get_arg(1));
         }
 
         if ($this->having) {
@@ -491,7 +491,7 @@ class Select extends AbstractQuery
     public function orderBy(array $spec)
     {
         foreach ($spec as $col) {
-            $this->order_by[] = $this->connection->quoteNamesIn($col);
+            $this->order_by[] = $this->pdo->quoteNamesIn($col);
         }
         return $this;
     }
@@ -584,38 +584,38 @@ class Select extends AbstractQuery
 
     public function fetchAll()
     {
-        $this->connection->bindValues($this->getBindValues());
-        return $this->connection->fetchAll($this->__toString());
+        $this->pdo->bindValues($this->getBindValues());
+        return $this->pdo->fetchAll($this->__toString());
     }
     
     public function fetchAssoc()
     {
-        $this->connection->bindValues($this->getBindValues());
-        return $this->connection->fetchAssoc($this->__toString());
+        $this->pdo->bindValues($this->getBindValues());
+        return $this->pdo->fetchAssoc($this->__toString());
     }
     
     public function fetchCol()
     {
-        $this->connection->bindValues($this->getBindValues());
-        return $this->connection->fetchCol($this->__toString());
+        $this->pdo->bindValues($this->getBindValues());
+        return $this->pdo->fetchCol($this->__toString());
     }
     
     public function fetchOne()
     {
-        $this->connection->bindValues($this->getBindValues());
-        return $this->connection->fetchOne($this->__toString());
+        $this->pdo->bindValues($this->getBindValues());
+        return $this->pdo->fetchOne($this->__toString());
     }
     
     public function fetchPairs()
     {
-        $this->connection->bindValues($this->getBindValues());
-        return $this->connection->fetchPairs($this->__toString());
+        $this->pdo->bindValues($this->getBindValues());
+        return $this->pdo->fetchPairs($this->__toString());
     }
     
     public function fetchValue()
     {
-        $this->connection->bindValues($this->getBindValues());
-        return $this->connection->fetchValue($this->__toString());
+        $this->pdo->bindValues($this->getBindValues());
+        return $this->pdo->fetchValue($this->__toString());
     }
     
     /**

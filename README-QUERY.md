@@ -13,7 +13,7 @@ later):
 ```php
 <?php
 use Aura\Sql\Query\QueryFactory;
-use Aura\Sql\Connection\MysqlConnection;
+use Aura\Sql\MysqlConnection;
 
 $query_factory = new QueryFactory;
 ?>
@@ -279,7 +279,7 @@ $select->bindValues(['id' => ['1, 2, 3']]);
 
 ### Fetching Results
 
-The `Select` object has the same `fetch*()` methods as the `ExtendedPdo`
+The `Select` object has the same `fetch*()` methods as the `Pdo`
 object:
 
 - `fetchAll()` returns a sequential array of rows, and the row arrays are

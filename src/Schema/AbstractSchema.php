@@ -1,9 +1,9 @@
 <?php
 namespace Aura\Sql\Schema;
 
-use Aura\Sql\Connection\ConnectionInterface;
+use Aura\Sql\Pdo\PdoInterface;
 
-abstract class AbstractSchema
+abstract class AbstractSchema implements SchemaInterface
 {
     /**
      * 
@@ -16,18 +16,27 @@ abstract class AbstractSchema
 
     /**
      * 
+     * An Pdo connection.
+     * 
+     * @var PdoInterface
+     * 
+     */
+    protected $pdo;
+    
+    /**
+     * 
      * Constructor.
      * 
-     * @param ConnectionInterface $connection A database connection.
+     * @param PdoInterface $connection A database connection.
      * 
      * @param ColumnFactory $column_factory A column object factory.
      * 
      */
     public function __construct(
-        ConnectionInterface $connection,
+        PdoInterface $pdo,
         ColumnFactory $column_factory
     ) {
-        $this->connection = $connection;
+        $this->pdo = $pdo;
         $this->column_factory = $column_factory;
     }
     

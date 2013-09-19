@@ -17,9 +17,9 @@ class MysqlSchema extends AbstractSchema
     {
         $text = 'SHOW TABLES';
         if ($schema) {
-            $text .= ' IN ' . $this->connection->quoteName($schema);
+            $text .= ' IN ' . $this->pdo->quoteName($schema);
         }
-        return $this->connection->fetchCol($text);
+        return $this->pdo->fetchCol($text);
     }
 
     /**
@@ -37,17 +37,17 @@ class MysqlSchema extends AbstractSchema
     {
         list($schema, $table) = $this->splitName($spec);
 
-        $table = $this->connection->quoteName($table);
+        $table = $this->pdo->quoteName($table);
         $text = "SHOW COLUMNS FROM $table";
 
         if ($schema) {
             $schema = preg_replace('/[^\w]/', '', $schema);
-            $schema = $this->connection->quoteName($schema);
+            $schema = $this->pdo->quoteName($schema);
             $text .= " IN $schema";
         }
 
         // get the column descriptions
-        $raw_cols = $this->connection->fetchAll($text);
+        $raw_cols = $this->pdo->fetchAll($text);
 
         // where the column info will be stored
         $cols = [];

@@ -8,16 +8,16 @@
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
  */
-namespace Aura\Sql\Connection;
+namespace Aura\Sql;
 
 /**
  * 
- * Manages connections to default, read, and write databases.
+ * Locates PDO services for default, read, and write databases.
  * 
  * @package Aura.Sql
  * 
  */
-interface ConnectionLocatorInterface
+interface PdoLocatorInterface
 {
     public function setDefault($spec);
     public function getDefault();

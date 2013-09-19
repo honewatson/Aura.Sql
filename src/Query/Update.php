@@ -66,7 +66,7 @@ class Update extends AbstractQuery
      */
     public function table($table)
     {
-        $this->table = $this->connection->quoteName($table);
+        $this->table = $this->pdo->quoteName($table);
         return $this;
     }
 }

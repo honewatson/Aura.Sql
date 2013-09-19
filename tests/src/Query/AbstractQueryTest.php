@@ -2,8 +2,8 @@
 namespace Aura\Sql\Query;
 
 use Aura\Sql\Assertions;
-use Aura\Sql\Connection\SqliteConnection;
-use Aura\Sql\Pdo\ExtendedPdo;
+use Aura\Sql\SqliteConnection;
+use Aura\Sql\Pdo\Pdo;
 use Aura\Sql\Profiler;
 use Aura\Sql\Query\QueryFactory;
 

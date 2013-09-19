@@ -8,7 +8,7 @@
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
  */
-namespace Aura\Sql\Connection;
+namespace Aura\Sql;
 
 /**
  * 
@@ -17,19 +17,19 @@ namespace Aura\Sql\Connection;
  * @package Aura.Sql
  * 
  */
-class ConnectionLocator implements ConnectionLocatorInterface
+class PdoLocator implements PdoLocatorInterface
 {
     /**
      * 
-     * A registry of connection objects.
+     * A registry of PDO connection objects.
      * 
      * @var array
      * 
      */
     protected $registry = [
         'default' => null,
-        'read' => [],
-        'write' => [],
+        'read' => array(),
+        'write' => array(),
     ];
 
     /**
@@ -41,8 +41,8 @@ class ConnectionLocator implements ConnectionLocatorInterface
      */
     protected $converted = [
         'default' => false,
-        'read' => [],
-        'write' => [],
+        'read' => array(),
+        'write' => array(),
     ];
     
     /**
@@ -58,8 +58,8 @@ class ConnectionLocator implements ConnectionLocatorInterface
      */
     public function __construct(
         $default,
-        array $read = [],
-        array $write = []
+        array $read = array(),
+        array $write = array()
     ) {
         $this->setDefault($default);
         foreach ($read as $name => $callable) {
@@ -191,7 +191,7 @@ class ConnectionLocator implements ConnectionLocatorInterface
         }
         
         if (! isset($this->registry[$type][$name])) {
-            throw new Exception\ConnectionNotFound("{$type}:{$name}");
+            throw new Exception\ServiceNotFound("{$type}:{$name}");
         }
         
         if (! $this->converted[$type][$name]) {

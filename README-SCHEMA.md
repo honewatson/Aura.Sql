@@ -13,7 +13,7 @@ connection:
 
 ```php
 <?php
-use Aura\Sql\Connection\MysqlConnection;
+use Aura\Sql\MysqlConnection;
 use Aura\Sql\Schema\MysqlSchema;
 
 $connection = new MysqlConnection(...);

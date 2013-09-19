@@ -10,7 +10,7 @@
  */
 namespace Aura\Sql\Query;
 
-use Aura\Sql\Connection\ConnectionInterface;
+use Aura\Sql\Pdo\PdoInterface;
 
 /**
  * 
@@ -25,10 +25,10 @@ abstract class AbstractQuery
      * 
      * An SQL connection.
      * 
-     * @var ConnectionInterface
+     * @var PdoInterface
      * 
      */
-    protected $connection;
+    protected $pdo;
 
     /**
      * 
@@ -43,14 +43,14 @@ abstract class AbstractQuery
      * 
      * Constructor.
      * 
-     * @param ConnectionInterface $connection An SQL connection.
+     * @param PdoInterface pdo An SQL connection.
      * 
      * @return void
      * 
      */
-    public function __construct(ConnectionInterface $connection)
+    public function __construct(PdoInterface pdo)
     {
-        $this->connection = $connection;
+        $this->pdo = $pdo;
     }
 
     /**
@@ -66,12 +66,12 @@ abstract class AbstractQuery
      * 
      * Gets the database connection for this query object.
      * 
-     * @return ConnectionInterface
+     * @return PdoInterface
      * 
      */
     public function getConnection()
     {
-        return $this->connection;
+        return $this->pdo;
     }
 
     /**
@@ -139,8 +139,8 @@ abstract class AbstractQuery
      */
     public function exec()
     {
-        $this->connection->bindValues($this->getBindValues());
-        return $this->connection->exec($this->__toString());
+        $this->pdo->bindValues($this->getBindValues());
+        return $this->pdo->exec($this->__toString());
     }
     
     /**
@@ -150,7 +150,7 @@ abstract class AbstractQuery
      */
     public function query()
     {
-        $this->connection->bindValues($this->getBindValues());
-        return $this->connection->query($this->__toString());
+        $this->pdo->bindValues($this->getBindValues());
+        return $this->pdo->query($this->__toString());
     }
 }

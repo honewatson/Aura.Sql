@@ -1,9 +1,7 @@
 <?php
-namespace Aura\Sql\Connection;
+namespace Aura\Sql;
 
-use Aura\Sql\Pdo\ExtendedPdo;
-
-class Mock extends AbstractConnection
+class MockPdo extends Pdo
 {
     protected $quote_name_prefix = '"';
     
@@ -14,7 +12,7 @@ class Mock extends AbstractConnection
         return $this->dsn;
     }
     
-    public function quote($val, $type = ExtendedPdo::PARAM_STR)
+    public function quote($val, $type = Pdo::PARAM_STR)
     {
         return "'" . strtr(
             $val,

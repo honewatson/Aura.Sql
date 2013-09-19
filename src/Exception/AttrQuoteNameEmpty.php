@@ -8,17 +8,17 @@
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
  */
-namespace Aura\Sql\Connection\Exception;
+namespace Aura\Sql\Exception;
 
-use Aura\Sql\Connection\Exception;
+use Aura\Sql\Exception;
 
 /**
  * 
- * Connection not found exception.
+ * Tries to set ATTR_QUOTE_NAME_* to an empty value.
  * 
  * @package Aura.Sql
  * 
  */
-class ConnectionNotFound extends Exception
+class AttrQuoteNameEmpty extends Exception
 {
 }

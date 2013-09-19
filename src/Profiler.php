@@ -8,10 +8,7 @@
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
  */
-namespace Aura\Sql\Pdo;
-
-use Exception;
-use PDOStatement;
+namespace Aura\Sql;
 
 /**
  * 
@@ -38,7 +35,7 @@ class Profiler implements ProfilerInterface
      * @var array
      *
      */
-    protected $profiles = [];
+    protected $profiles = array();
 
     /**
      * 
@@ -77,20 +74,20 @@ class Profiler implements ProfilerInterface
         $duration,
         $function,
         $statement,
-        array $bind_values = []
+        array $bind_values = array()
     ) {
         if (! $this->isActive()) {
             return;
         }
 
         $e = new Exception;
-        $this->profiles[] = [
+        $this->profiles[] = array(
             'duration'    => $duration,
             'function'    => $function,
             'statement'   => $statement,
             'bind_values' => $bind_values,
             'trace'       => $e->getTraceAsString(),
-        ];
+        );
     }
 
     /**

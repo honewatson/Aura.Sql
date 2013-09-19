@@ -2,7 +2,7 @@ Aura.Sql.Connection
 ===================
 
 This library is part of [`Aura.Sql`](README.md).  It is an extra
-extension to `ExtendedPdo` to provide driver-specific functionality, such as
+extension to `Pdo` to provide driver-specific functionality, such as
 quoting of identifier names, getting the last insert ID, and adding `LIMIT`
 clauses to `SELECT` statements.
 
@@ -15,12 +15,12 @@ and DELETE statements in an object-oriented fashion.
 Instantiation
 -------------
 
-Instantiate a `Connection` the same way you would a `PDO` or `ExtendedPdo`
+Instantiate a `Connection` the same way you would a `PDO` or `Pdo`
 object. Be sure to pick the right driver type for your connection DSN.
 
 ```php
 <?php
-use Aura\Sql\Connection;
+use Aura\Sql;
 
 // MySQL
 $conn = new MysqlConnection(
@@ -43,7 +43,7 @@ $conn = new SqliteConnection(
 ?>
 ```
 
-As the `Connection` classes extend `ExtendedPdo`, which itself extends `PDO`,
+As the `Connection` classes extend `Pdo`, which itself extends `PDO`,
 you should be able to use a `Connection` class in place of the other two
 classes with no trouble.
 
