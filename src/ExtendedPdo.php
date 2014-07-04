@@ -120,21 +120,9 @@ class ExtendedPdo extends PDO implements ExtendedPdoInterface
      *
      */
     public function __construct(
-        $dsn,
-        $username = null,
-        $password = null,
-        array $options = array(),
-        array $attributes = array()
+        $pdo
     ) {
-        if ($dsn instanceof PDO) {
-            $this->pdo = $dsn;
-        } else {
-            $this->dsn = $dsn;
-            $this->username = $username;
-            $this->password = $password;
-            $this->options = $options;
-            $this->attributes = array_replace($this->attributes, $attributes);
-        }
+        $this->pdo = $pdo;
     }
 
     /**
@@ -148,7 +136,6 @@ class ExtendedPdo extends PDO implements ExtendedPdoInterface
      */
     public function beginTransaction()
     {
-        $this->connect();
         $this->beginProfile(__FUNCTION__);
         $result = $this->pdo->beginTransaction();
         $this->endProfile();
@@ -166,7 +153,6 @@ class ExtendedPdo extends PDO implements ExtendedPdoInterface
      */
     public function commit()
     {
-        $this->connect();
         $this->beginProfile(__FUNCTION__);
         $result = $this->pdo->commit();
         $this->endProfile();
@@ -184,25 +170,7 @@ class ExtendedPdo extends PDO implements ExtendedPdoInterface
      */
     public function connect()
     {
-        // don't connect twice
-        if ($this->pdo) {
-            return;
-        }
 
-        // connect to the database
-        $this->beginProfile(__FUNCTION__);
-        $this->pdo = new PDO(
-            $this->dsn,
-            $this->username,
-            $this->password,
-            $this->options
-        );
-        $this->endProfile();
-
-        // set attributes
-        foreach ($this->attributes as $attribute => $value) {
-            $this->setAttribute($attribute, $value);
-        }
     }
 
     /**
@@ -214,7 +182,7 @@ class ExtendedPdo extends PDO implements ExtendedPdoInterface
      */
     public function errorCode()
     {
-        $this->connect();
+
         return $this->pdo->errorCode();
     }
 
@@ -227,7 +195,7 @@ class ExtendedPdo extends PDO implements ExtendedPdoInterface
      */
     public function errorInfo()
     {
-        $this->connect();
+  
         return $this->pdo->errorInfo();
     }
 
@@ -244,7 +212,6 @@ class ExtendedPdo extends PDO implements ExtendedPdoInterface
      */
     public function exec($statement)
     {
-        $this->connect();
         $this->beginProfile(__FUNCTION__);
         $affected_rows = $this->pdo->exec($statement);
         $this->endProfile($statement);
@@ -543,7 +510,7 @@ class ExtendedPdo extends PDO implements ExtendedPdoInterface
      */
     public function getAttribute($attribute)
     {
-        $this->connect();
+
         return $this->pdo->getAttribute($attribute);
     }
 
@@ -569,7 +536,6 @@ class ExtendedPdo extends PDO implements ExtendedPdoInterface
      */
     public function getPdo()
     {
-        $this->connect();
         return $this->pdo;
     }
 
@@ -596,24 +562,12 @@ class ExtendedPdo extends PDO implements ExtendedPdoInterface
      */
     public function inTransaction()
     {
-        $this->connect();
         $this->beginProfile(__FUNCTION__);
         $result = $this->pdo->inTransaction();
         $this->endProfile();
         return $result;
     }
 
-    /**
-     *
-     * Is this instance connected to a database?
-     *
-     * @return bool
-     *
-     */
-    public function isConnected()
-    {
-        return isset($this->pdo);
-    }
 
     /**
      *
@@ -629,7 +583,6 @@ class ExtendedPdo extends PDO implements ExtendedPdoInterface
      */
     public function lastInsertId($name = null)
     {
-        $this->connect();
         $this->beginProfile(__FUNCTION__);
         $result = $this->pdo->lastInsertId($name);
         $this->endProfile();
@@ -676,7 +629,6 @@ class ExtendedPdo extends PDO implements ExtendedPdoInterface
      */
     public function prepare($statement, $options = array())
     {
-        $this->connect();
         return $this->pdo->prepare($statement, $options);
     }
 
@@ -702,7 +654,6 @@ class ExtendedPdo extends PDO implements ExtendedPdoInterface
      */
     public function query($statement)
     {
-        $this->connect();
         $this->beginProfile(__FUNCTION__);
 
         // remove empty constructor params list if it exists
@@ -735,7 +686,6 @@ class ExtendedPdo extends PDO implements ExtendedPdoInterface
      */
     public function quote($value, $parameter_type = self::PARAM_STR)
     {
-        $this->connect();
 
         // non-array quoting
         if (! is_array($value)) {
@@ -760,7 +710,6 @@ class ExtendedPdo extends PDO implements ExtendedPdoInterface
      */
     public function rollBack()
     {
-        $this->connect();
         $this->beginProfile(__FUNCTION__);
         $result = $this->pdo->rollBack();
         $this->endProfile();
