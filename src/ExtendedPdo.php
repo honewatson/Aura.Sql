@@ -172,7 +172,9 @@ class ExtendedPdo extends PDO implements ExtendedPdoInterface
     {
 
     }
-
+    
+    public function isConnected() {}
+    
     /**
      *
      * Gets the most recent error code.
